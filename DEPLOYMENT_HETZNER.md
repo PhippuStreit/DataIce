@@ -24,11 +24,23 @@
 
 ### Auf deinem lokalen Mac:
 ```bash
-# Verbinde dich zum neuen Server
-ssh root@<SERVER_IP>
+# Verbinde dich zum Server (mit Passwort)
+ssh root@88.198.172.8
 
-# Oder mit SSH Key:
-ssh -i ~/.ssh/id_ed25519 root@<SERVER_IP>
+# Nach SSH Key Setup (ohne Passwort):
+ssh root@88.198.172.8
+```
+
+### SSH Key hinzufügen (erste Verbindung):
+```bash
+# Auf dem Server (nach Login mit Passwort):
+mkdir -p ~/.ssh
+cat >> ~/.ssh/authorized_keys << 'EOF'
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKx7z8+... philippe@streit.family
+EOF
+
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
 ```
 
 ---
@@ -62,10 +74,10 @@ usermod -aG docker appuser
 
 ## 4. Domain und DNS konfigurieren
 
-### DNS auf Hetzner/deinem DNS-Provider:
+### DNS auf deinem DNS-Provider:
 ```
-A Record: example.com -> <SERVER_IP>
-A Record: www.example.com -> <SERVER_IP>
+A Record: example.com -> 88.198.172.8
+A Record: www.example.com -> 88.198.172.8
 ```
 
 **Hinweis:** Warte 15-30 Min, bis DNS propagiert ist.
@@ -399,6 +411,38 @@ docker-compose exec web npx prisma studio
 - **Total:** ~5-10 € / Monat
 
 ---
+
+## Quick Start für dein Setup
+
+### Schritt-für-Schritt (Server 88.198.172.8):
+
+1. **SSH Key hinzufügen:**
+   ```bash
+   ssh root@88.198.172.8
+   # Passwort eingeben
+   
+   mkdir -p ~/.ssh
+   cat >> ~/.ssh/authorized_keys << 'EOF'
+   ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKx7z8+... philippe@streit.family
+   EOF
+   chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
+   exit
+   ```
+
+2. **Server vorbereiten:**
+   ```bash
+   ssh root@88.198.172.8
+   apt update && apt upgrade -y
+   
+   # Docker installieren (siehe Schritt 3)
+   ```
+
+3. **Domain DNS einstellen:**
+   - A Record: `example.com` → `88.198.172.8`
+   - A Record: `www.example.com` → `88.198.172.8`
+   - Warte 15-30 Min auf Propagation
+
+4. **App deployen (siehe Schritt 5-8)**
 
 ## Nächste Schritte
 
