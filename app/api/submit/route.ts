@@ -11,6 +11,7 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       logger.warn('submit.validation_failed', {
         error: parsed.error.issues.map((issue) => issue.message),
+        fields: parsed.error.issues.map((issue) => ({ path: issue.path.join('.'), message: issue.message })),
       });
 
       return NextResponse.json(
@@ -18,6 +19,7 @@ export async function POST(request: Request) {
           status: 400,
           error: 'validation_failed',
           message: 'Bitte prüfe deine Eingaben und fülle alle Pflichtfelder aus.',
+          details: parsed.error.issues.map((issue) => ({ path: issue.path.join('.'), message: issue.message })),
         },
         { status: 400 },
       );
@@ -39,7 +41,7 @@ export async function POST(request: Request) {
         operatingSystem: data.operatingSystem,
         appCount: data.appCount,
         passwordManager: data.passwordManager,
-        privacyReading: data.privacyReading,
+        privacyReading: data.privacyReading === 'Ja',
         phoneNumber: data.phoneNumber,
         iceName: data.iceName,
         newsletter: Boolean(data.newsletter),

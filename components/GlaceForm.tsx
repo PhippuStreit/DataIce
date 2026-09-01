@@ -77,7 +77,10 @@ export default function GlaceForm() {
       const result = await response.json();
 
       if (!response.ok) {
-        setSubmitError(result.message || 'Es gab einen Fehler beim Absenden.');
+        const errorMsg = result.details
+          ? result.details.map((d: any) => `${d.path}: ${d.message}`).join(' | ')
+          : result.message || 'Es gab einen Fehler beim Absenden.';
+        setSubmitError(errorMsg);
         return;
       }
 

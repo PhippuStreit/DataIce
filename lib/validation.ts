@@ -11,8 +11,8 @@ export const formDataSchema = z.object({
   operatingSystem: z.string().min(1, 'Bitte wähle dein Betriebssystem.'),
   appCount: z.string().min(1, 'Bitte wähle eine Anzahl.'),
   passwordManager: z.string().min(1, 'Bitte wähle eine Option.'),
-  privacyReading: z.boolean().refine((value) => value === true, {
-    message: 'Bitte gib an, ob du die Datenschutzerklärung gelesen hast.',
+  privacyReading: z.string().refine((value) => value === 'Ja', {
+    message: 'Bitte akzeptiere die Datenschutzerklärung.',
   }),
   phoneNumber: z.string().min(1, 'Bitte gib deine Handynummer ein.'),
   iceName: z.string().min(1, 'Bitte gib den Namen für deine Glace ein.'),
