@@ -11,6 +11,12 @@
 ### Session 2026-08-30
 - Q: How should incomplete sessions be handled after inactivity or return visits? → A: Unvollständige Antworten werden automatisch als Entwurf gespeichert; Inaktivitäts-Timeout 10–15 Minuten; zurückkehrende Besucher können den Verlauf fortsetzen oder neu starten; Verlassens-/Abbruch-Sessions werden als Telemetrie-Event erfasst.
 
+### Session 2026-09-02
+- Anpassung: Titel des Formulars lautet "Deine Gratis-Glace" (vorher "Dein …").
+- Anpassung: Pflichtfelder werden mit "*" gekennzeichnet; der "Weiter"-Button ist erst aktiv, wenn alle Pflichtfelder des aktuellen Schritts ausgefüllt sind (Schritt-Gate zusätzlich zur Meldungslogik aus FR-006). Bei `privacyReading` zählt nur "Ja" als ausgefüllt.
+- Anpassung: Nach erfolgreichem Absenden erscheint ein Abschluss-Screen ("Merci viumau", Nexplore-Logo, Link zu www.nexplore.ch) statt eines Auto-Resets zurück auf Schritt 1.
+- Anpassung: Die Anwendung tritt unter Nexplore-Branding auf (Logo im Header, Seitentitel).
+
 **Input**: User description: "Umsetzung des bereits definierten Glace-Formulars aus der Bauanleitung als feste digitale Lösung. Das Formular selbst ist fertig definiert und wird nicht vom Nutzer erstellt, sondern direkt als feste Programmierung gemäß Bauanleitung umgesetzt. Es soll für mobile Nutzung optimiert sein, eine einfache Datenbank hinter sich haben und intern leicht wartbar bleiben, ohne dass ein komplexer dynamischer Builder gebaut wird. Das UI soll sehr einfach zum Ausfüllen sein: möglichst nur Clicks, Buttons und Auswahlen – keine Texteingabe. Alle Interaktionen werden getracked: Feldaufruf, Zeit pro Feld (bis Weiterdrücken), Interaktionstyp, Zeitstempel."
 
 ## Formulardefinition gemäß Bauanleitung (Source of Truth)
@@ -20,8 +26,9 @@ Die in dieser Spezifikation definierte Formulardefinition ist die verbindliche G
 Die Anwendung implementiert das Glace-Formular als feste, technisch umgesetzte Formularliste. Die nachstehende Feldliste entspricht dem Text der Bauanleitung und bildet die fachliche Grundlage für die Produktumsetzung.
 
 ### Titel und Untertitel des Formulars
-- Titel: "🍦 Dein Gratis-Glace – nur noch 20 Sekunden!"
+- Titel: "Deine Gratis-Glace"
 - Untertitel: "Fast geschafft. Ein paar kurze Angaben, dann kannst du schöpfen."
+- Header: Nexplore-Logo statt Text-Wortmarke.
 
 ### Abschnitt 1: "Damit wir wissen, wer da ist"
 1. Wie heisst du? (Vorname)
@@ -263,12 +270,13 @@ Das Entwicklungsteam muss das Glace-Formular in einer klaren und wartbaren Weise
 - **FR-008**: Das Setup MUSS bewusst einfach gehalten sein und keine komplexe generische Builder-Architektur erfordern.
 - **FR-009**: Die Lösung MUSS direkt auf die fachliche Formulardefinition aus der Bauanleitung fokussieren und keine unnötige technische Komplexität aufbauen.
 - **FR-010**: Das System MUSS die Datenerfassung robust genug machen, dass sie im praktischen Einsatz zuverlässig funktioniert.
-- **FR-011**: Das System MUSS unvollständige Formularangaben automatisch als Entwurf speichern, damit ein unterbrochener Durchlauf in einer späteren Session fortgesetzt oder neu gestartet werden kann. Der Timeout für Inaktivität MUSS zwischen 10 und 15 Minuten liegen, damit die Session bei längerer Untätigkeit sauber verworfen oder neu gestartet werden kann.
-- **FR-012**: Das System MUSS zurückkehrende Besucher in der Lage versetzen, einen bestehenden Entwurf wieder aufzunehmen oder den Ablauf neu zu starten, ohne bisher eingegebene Daten zu verlieren.
+- **FR-011**: Das System MUSS unvollständige Formularangaben automatisch als Entwurf speichern, damit ein unterbrochener Durchlauf in einer späteren Session fortgesetzt oder neu gestartet werden kann. Der Timeout für Inaktivität MUSS zwischen 10 und 15 Minuten liegen, damit die Session bei längerer Untätigkeit sauber verworfen oder neu gestartet werden kann. Das Schritt-Gate aus UX-006 (kein "Weiter" bei unvollständigem Schritt) bleibt davon unberührt.
+- **FR-012**: Das System MUSS zurückkehrende Besucher in der Lage versetzen, einen bestehenden Entwurf wieder aufzunehmen oder den Ablauf neu zu starten, ohne bisher eingegebene Daten zu verlieren. Nach dem erfolgreichen Absenden (Abschluss-Screen, UX-007) gilt der Durchlauf als beendet; ein neuer Durchlauf beginnt über einen Reload.
 - **FR-013**: Das System MUSS den Abbruch oder Verlassen einer Session als Telemetrie-Event erfassen, damit die Abbruchrate und der Wiederaufnahmepfad messbar sind.
 - **FR-014**: Kleine Änderungen am Formular MÜSSEN nur durch das zuständige Entwicklungsteam oder die verantwortliche fachliche Stelle erfolgen, nicht durch Endnutzer.
 - **FR-015**: Newsletter-Consent MUSS erst nach erfolgreichem Double-Opt-In aktiviert werden; unbestätigte Einwilligungen DÜRFEN nicht als Marketing-Subscription gelten.
 - **FR-016**: In der ersten Version gibt es keinen Selbstbedienungs-Delete-Flow; personenbezogene Daten bleiben bis zum Ablauf der definierten Aufbewahrungsdauer gespeichert und werden nur durch manuelle Admin-Action bereinigt.
+- **FR-017**: Die Anwendung MUSS unter Nexplore-Branding auftreten: Nexplore-Logo im Formular-Header und im Abschluss-Screen, Nexplore im Seitentitel. Das ausgelieferte Logo (`public/nexplore.svg`) ist durch das offizielle Asset zu ersetzen.
 
 ### UI/UX Requirements – Interaction Pattern
 
@@ -277,6 +285,8 @@ Das Entwicklungsteam muss das Glace-Formular in einer klaren und wartbaren Weise
 - **UX-003**: Wo Text notwendig ist (z. B. Vorname, Postleitzahl), SOLLEN Eingabemasken mit kleinem Zeichenumfang und Platzhaltern eingesetzt werden, um die Eingabedauer zu minimieren.
 - **UX-004**: Die Bedienelemente MÜSSEN gut erreichbar und sichtbar sein; Buttons SOLLEN mindestens 48px im Quadrat sein.
 - **UX-005**: Das Formular SOLL auf Smartphones schnell, ohne Rucken, und mit minimaler kognitiver Last bedienbar sein.
+- **UX-006**: Pflichtfelder MÜSSEN im Label mit "*" gekennzeichnet sein. Der "Weiter"-Button (bzw. "Absenden" im letzten Schritt) MUSS deaktiviert bleiben, bis alle Pflichtfelder des aktuellen Schritts ausgefüllt sind. Für `privacyReading` gilt nur die Auswahl "Ja" als ausgefüllt.
+- **UX-007**: Nach erfolgreichem Absenden MUSS ein Abschluss-Screen erscheinen: "Merci viumau", Nexplore-Logo und ein Link/Button zu `https://www.nexplore.ch`. Das Formular DARF nicht automatisch zurückgesetzt oder neu gestartet werden.
 
 ### Tracking & Telemetry Requirements
 
