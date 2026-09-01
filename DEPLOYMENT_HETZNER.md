@@ -76,11 +76,14 @@ usermod -aG docker appuser
 
 ### DNS auf deinem DNS-Provider:
 ```
-A Record: example.com -> 88.198.172.8
-A Record: www.example.com -> 88.198.172.8
+A Record: data.digidude.ch -> 88.198.172.8
 ```
 
-**Hinweis:** Warte 15-30 Min, bis DNS propagiert ist.
+**Hinweis:** Warte 15-30 Min, bis DNS propagiert ist. Prüfen:
+```bash
+dig +short data.digidude.ch     # muss 88.198.172.8 liefern
+```
+Certbot schlägt fehl, solange der A-Record nicht auf den Server zeigt.
 
 ---
 
@@ -126,52 +129,32 @@ Wichtig an `docker-compose.prod.yml`:
 
 ## 6. Nginx als Reverse Proxy + SSL mit Let's Encrypt
 
-### Nginx installieren:
+**Alles in diesem Abschnitt als `root` ausführen** (`ssh root@88.198.172.8`).
+`appuser` hat kein `sudo`. `sudo` deshalb weglassen.
+
+Zwei Phasen: erst HTTP-only, dann baut Certbot den HTTPS-Block selbst.
+Direkt einen SSL-Block schreiben scheitert – die Zertifikate existieren noch
+nicht (`cannot load certificate ... No such file or directory`).
+
+### Nginx + Certbot installieren:
 ```bash
-sudo apt install -y nginx certbot python3-certbot-nginx
+apt update
+apt install -y nginx certbot python3-certbot-nginx
 ```
 
-### Nginx Config erstellen:
+### Phase 1 – HTTP-only Config:
 ```bash
-sudo nano /etc/nginx/sites-available/dataice
+nano /etc/nginx/sites-available/dataice
 ```
 
 ```nginx
-# HTTP -> HTTPS Redirect
 server {
     listen 80;
     listen [::]:80;
-    server_name example.com www.example.com;
-    
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-    
+    server_name data.digidude.ch;
+
     location / {
-        return 301 https://$host$request_uri;
-    }
-}
-
-# HTTPS Server
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name example.com www.example.com;
-
-    # SSL Zertifikate (werden von Certbot generiert)
-    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
-    
-    # SSL Security Best Practices
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!MD5;
-    ssl_prefer_server_ciphers on;
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
-
-    # Proxy zu Docker App
-    location / {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -184,41 +167,40 @@ server {
 }
 ```
 
-### Nginx Config aktivieren:
+### Aktivieren:
 ```bash
-# Symlink erstellen
-sudo ln -s /etc/nginx/sites-available/dataice /etc/nginx/sites-enabled/
-
-# Default Site deaktivieren (optional)
-sudo rm /etc/nginx/sites-enabled/default
-
-# Teste Konfiguration
-sudo nginx -t
-
-# Nginx starten
-sudo systemctl restart nginx
+ln -sf /etc/nginx/sites-available/dataice /etc/nginx/sites-enabled/
+rm -f /etc/nginx/sites-enabled/default
+nginx -t
+systemctl restart nginx
 ```
 
 ---
 
-## 7. SSL-Zertifikat mit Let's Encrypt
+## 7. SSL-Zertifikat mit Let's Encrypt (Phase 2)
 
-### Zertifikat ausstellen:
+Voraussetzung: `dig +short data.digidude.ch` liefert `88.198.172.8`.
+
 ```bash
-# Ersetze example.com mit deiner Domain
-sudo certbot certonly --nginx -d example.com -d www.example.com
+certbot --nginx -d data.digidude.ch \
+  --agree-tos -m philippe@streit.family --redirect --non-interactive
 ```
 
-**Hinweis:** Certbot wird dich nach deiner Email fragen. Nutze eine echte Email, falls Zertifikat-Renewals notwendig sind.
+`--nginx` (nicht `certonly`) → Certbot schreibt den `443 ssl`-Block +
+HTTP→HTTPS-Redirect selbst in die Config und lädt nginx neu. `--redirect`
+erzwingt HTTPS. Kein manueller SSL-Block nötig.
 
-### Auto-Renewal konfigurieren:
+### Auto-Renewal prüfen:
 ```bash
-# Teste Renewal
-sudo certbot renew --dry-run
+certbot renew --dry-run
+systemctl status certbot.timer     # muss "active" sein
+```
+Der Timer wird bei der Installation automatisch aktiviert.
 
-# Prüfe ob Service läuft
-sudo systemctl status certbot.timer
-sudo systemctl enable certbot.timer
+### Testen:
+```bash
+nginx -t && systemctl reload nginx
+curl -I https://data.digidude.ch
 ```
 
 ---
@@ -243,19 +225,16 @@ curl -I http://127.0.0.1:3000
 
 ## 9. Firewall konfigurieren (optional, empfohlen)
 
+Als `root`:
 ```bash
-# UFW installieren
-sudo apt install -y ufw
-
-# Ports öffnen
-sudo ufw allow 22/tcp    # SSH
-sudo ufw allow 80/tcp    # HTTP
-sudo ufw allow 443/tcp   # HTTPS
-sudo ufw enable
-
-# Status prüfen
-sudo ufw status
+apt install -y ufw
+ufw allow 22/tcp     # SSH
+ufw allow 80/tcp     # HTTP
+ufw allow 443/tcp    # HTTPS
+ufw --force enable
+ufw status
 ```
+Port 3000 nicht öffnen – Container ist auf `127.0.0.1` gebunden, nur nginx greift zu.
 
 ---
 
@@ -316,11 +295,11 @@ dc ps
 
 Nachdem alles läuft, teste deine SSL:
 ```bash
-# Via Browser: https://example.com
+# Via Browser: https://data.digidude.ch
 # Sollte grünes Schloss zeigen
 
 # Via CLI:
-curl -I https://example.com
+curl -I https://data.digidude.ch
 ```
 
 ---
@@ -368,7 +347,7 @@ docker-compose -f docker-compose.prod.yml --env-file .env.prod exec web npx pris
 - [ ] Domain DNS konfiguriert
 - [ ] SSL-Zertifikat mit Let's Encrypt erstellt
 - [ ] App läuft: `docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d --build`
-- [ ] https://example.com erreichbar
+- [ ] https://data.digidude.ch erreichbar
 - [ ] Backup-Script eingerichtet
 - [ ] Firewall konfiguriert
 
@@ -409,9 +388,8 @@ docker-compose -f docker-compose.prod.yml --env-file .env.prod exec web npx pris
    ```
 
 3. **Domain DNS einstellen:**
-   - A Record: `example.com` → `88.198.172.8`
-   - A Record: `www.example.com` → `88.198.172.8`
-   - Warte 15-30 Min auf Propagation
+   - A Record: `data.digidude.ch` → `88.198.172.8`
+   - Warte 15-30 Min auf Propagation, prüfen mit `dig +short data.digidude.ch`
 
 4. **App deployen (siehe Schritt 5-8)**
 

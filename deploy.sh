@@ -60,42 +60,20 @@ SESSION_SECRET=$(openssl rand -base64 32)
 EOF
 SCRIPT
 
-# Step 5: Nginx konfigurieren
-echo "✓ Installing Nginx..."
+# Step 5: Nginx konfigurieren (Phase 1: HTTP-only)
+echo "✓ Installing Nginx (HTTP-only)..."
 ssh root@$SERVER_IP << SCRIPT
+    apt update
     apt install -y nginx certbot python3-certbot-nginx
-    
+
     cat > /etc/nginx/sites-available/$DOMAIN << 'NGINX'
 server {
     listen 80;
     listen [::]:80;
-    server_name $DOMAIN www.$DOMAIN;
-    
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-    
-    location / {
-        return 301 https://\$host\$request_uri;
-    }
-}
-
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name $DOMAIN www.$DOMAIN;
-
-    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
-    
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!MD5;
-    ssl_prefer_server_ciphers on;
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
+    server_name $DOMAIN;
 
     location / {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -107,16 +85,16 @@ server {
     }
 }
 NGINX
-    
+
     ln -sf /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
     rm -f /etc/nginx/sites-enabled/default
     nginx -t
     systemctl restart nginx
 SCRIPT
 
-# Step 6: SSL Zertifikat
+# Step 6: SSL Zertifikat (Phase 2: certbot baut den HTTPS-Block selbst)
 echo "✓ Generating SSL Certificate with Let's Encrypt..."
-ssh root@$SERVER_IP "certbot certonly --nginx -d $DOMAIN -d www.$DOMAIN --agree-tos -m admin@$DOMAIN --non-interactive"
+ssh root@$SERVER_IP "certbot --nginx -d $DOMAIN --agree-tos -m admin@$DOMAIN --redirect --non-interactive"
 
 # Step 7: Application starten
 echo "✓ Starting Application..."
@@ -132,7 +110,7 @@ ssh root@$SERVER_IP << SCRIPT
     ufw allow 22/tcp
     ufw allow 80/tcp
     ufw allow 443/tcp
-    ufw enable --force
+    ufw --force enable
 SCRIPT
 
 # Step 9: Backup-Script

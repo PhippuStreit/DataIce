@@ -1,0 +1,5 @@
+id,sessionId,correlationId,createdAt,submittedAt,completedAt,firstName,company,role,yearsExperience,postalCode,favoriteFlavor,visitReason,operatingSystem,appCount,passwordManager,phoneNumber,iceName,newsletter,termsAccepted,privacyReading
+47698c9f-8fd9-4fed-a193-231bac7493d7,test-session-123,corr-test-456,2026-09-01 19:48:31.119,2026-09-01 19:48:31.119,,Max,TestCorp,Marketing,3-5,8000,Vanille,Neugierde,iOS,5-10,Ja,+41791234567,Max Mustermann,t,t,t
+2df310bb-1f31-4b27-a556-5aa1cc71803a,test-session-456,corr-test-789,2026-09-01 19:51:46.141,2026-09-01 19:51:46.141,,Anna,TestCorp,Marketing,3-5,8000,Vanille,Neu,iOS,6-10,Ja,+41791234567,Anna Glace,t,t,t
+8ddf67bd-6f9a-4aec-81e3-b51a75e8f5ea,mobile-session,corr-mobile,2026-09-01 19:53:20.986,2026-09-01 19:53:20.986,,sd,sdf,Marketing,3-5,3123,Vanille,Wiederholung,iOS,11-20,Nein,+41793307703,asdf,t,t,t
+241f173a-c8be-4ed8-aaa5-8aba1d2a82e4,mobile-session,corr-mobile,2026-09-01 19:53:47.456,2026-09-01 19:53:47.456,,asdf,asdf,Marketing,3-5,3123,Schokolade,Wiederholung,iOS,6-10,Nein,+41793307703,asdf,f,t,t
