@@ -143,7 +143,7 @@ ssh appuser@$SERVER_IP << 'SCRIPT'
 BACKUP_DIR=/home/appuser/backups
 mkdir -p $BACKUP_DIR
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-docker exec dataice-db-1 pg_dump -U postgres dataice | gzip > $BACKUP_DIR/dataice_$TIMESTAMP.sql.gz
+docker exec dataice-db pg_dump -U postgres dataice | gzip > $BACKUP_DIR/dataice_$TIMESTAMP.sql.gz
 find $BACKUP_DIR -name "dataice_*.sql.gz" -mtime +30 -delete
 echo "Backup created: $BACKUP_DIR/dataice_$TIMESTAMP.sql.gz"
 EOF

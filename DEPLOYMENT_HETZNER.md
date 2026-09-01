@@ -94,66 +94,33 @@ su - appuser
 # Repository klonen
 git clone https://github.com/PhippuStreit/DataIce.git
 cd DataIce
-
-# Environment konfigurieren
-cp .env.example .env
-# Passe DATABASE_URL an, falls nötig (default ist OK)
 ```
 
-### docker-compose.yml anpassen (WICHTIG für Production):
+Kein `.env` nötig – Production nutzt `.env.prod` (siehe nächster Abschnitt).
+
+### Production-Setup: `docker-compose.prod.yml` + `.env.prod`
+
+Das Repo enthält bereits `docker-compose.prod.yml`. Nicht editieren – alle
+Secrets kommen über `.env.prod`:
+
 ```bash
-nano docker-compose.yml
+cd ~/DataIce
+cat > .env.prod << EOF
+DB_PASSWORD=$(openssl rand -base64 24 | tr -d '/+=')
+SESSION_SECRET=$(openssl rand -base64 32)
+LOG_LEVEL=info
+EOF
+chmod 600 .env.prod
 ```
 
-Ändere die Umgebung für Production:
-```yaml
-version: '3.8'
-
-services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: CHANGE_THIS_PASSWORD  # ← Ändere dieses Passwort!
-      POSTGRES_DB: dataice
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d dataice"]
-      timeout: 5s
-      interval: 10s
-      retries: 5
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: always
-    networks:
-      - dataice-net
-
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: sh -c "npx prisma db push && npm run build && npm start -- --hostname 0.0.0.0"
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql://postgres:CHANGE_THIS_PASSWORD@db:5432/dataice?schema=public
-      NODE_ENV: production
-      LOG_LEVEL: info
-      SESSION_SECRET: $(openssl rand -base64 32)
-    restart: always
-    expose:
-      - 3000
-    networks:
-      - dataice-net
-
-networks:
-  dataice-net:
-    driver: bridge
-
-volumes:
-  postgres_data:
-    driver: local
-```
+Wichtig an `docker-compose.prod.yml`:
+- `web` published Port nur auf `127.0.0.1:3000` – nicht öffentlich, nginx
+  proxyt von aussen dorthin.
+- `DB_PASSWORD` und `SESSION_SECRET` sind Pflicht (`:?`), Start bricht ab wenn
+  nicht in `.env.prod` gesetzt.
+- Build (`next build`) passiert im `Dockerfile`, nicht im `command` – sonst
+  baut jeder Container-Restart neu.
+- Container heissen `dataice-db` / `dataice-web` (relevant fürs Backup-Script).
 
 ---
 
@@ -261,15 +228,15 @@ sudo systemctl enable certbot.timer
 ```bash
 cd ~/DataIce
 
-# Container bauen und starten
-docker-compose up -d --build
+# Container bauen und starten (Production!)
+docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 
 # Prüfe Status
-docker-compose ps
-docker-compose logs --tail=50 web
+docker-compose -f docker-compose.prod.yml ps
+docker-compose -f docker-compose.prod.yml logs --tail=50 web
 
-# Prüfe die App
-curl -I http://localhost:3000
+# Prüfe die App (nur auf localhost erreichbar)
+curl -I http://127.0.0.1:3000
 ```
 
 ---
@@ -303,7 +270,7 @@ BACKUP_DIR=/home/appuser/backups
 mkdir -p $BACKUP_DIR
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
-docker exec dataice-db-1 pg_dump -U postgres dataice | gzip > $BACKUP_DIR/dataice_$TIMESTAMP.sql.gz
+docker exec dataice-db pg_dump -U postgres dataice | gzip > $BACKUP_DIR/dataice_$TIMESTAMP.sql.gz
 
 # Alte Backups löschen (älter als 30 Tage)
 find $BACKUP_DIR -name "dataice_*.sql.gz" -mtime +30 -delete
@@ -325,14 +292,17 @@ crontab -e
 
 ### Docker Logs anschauen:
 ```bash
+cd ~/DataIce
+alias dc="docker-compose -f docker-compose.prod.yml --env-file .env.prod"
+
 # Laufende Logs
-docker-compose logs -f web
+dc logs -f web
 
 # Letzte 100 Zeilen
-docker-compose logs --tail=100 web
+dc logs --tail=100 web
 
 # Container Status
-docker-compose ps
+dc ps
 ```
 
 ### Hetzner Metrics nutzen:
@@ -359,7 +329,8 @@ curl -I https://example.com
 
 ### App läuft nicht:
 ```bash
-docker-compose logs web
+cd ~/DataIce
+docker-compose -f docker-compose.prod.yml --env-file .env.prod logs web
 # Suche nach Fehlern
 ```
 
@@ -380,7 +351,7 @@ sudo certbot renew --force-renewal
 
 ### Datenbank-Verbindung:
 ```bash
-docker-compose exec web npx prisma studio
+docker-compose -f docker-compose.prod.yml --env-file .env.prod exec web npx prisma studio
 # Öffnet Web-Interface für Datenbank (localhost:5555)
 ```
 
@@ -392,11 +363,11 @@ docker-compose exec web npx prisma studio
 - [ ] SSH-Zugang funktioniert
 - [ ] Docker & Docker Compose installiert
 - [ ] Repository geklont
-- [ ] docker-compose.yml für Production angepasst (Passwort geändert!)
+- [ ] `.env.prod` erstellt (DB_PASSWORD + SESSION_SECRET gesetzt!)
 - [ ] Nginx installiert und konfiguriert
 - [ ] Domain DNS konfiguriert
 - [ ] SSL-Zertifikat mit Let's Encrypt erstellt
-- [ ] App läuft: `docker-compose up -d`
+- [ ] App läuft: `docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d --build`
 - [ ] https://example.com erreichbar
 - [ ] Backup-Script eingerichtet
 - [ ] Firewall konfiguriert
