@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
+// Hits the DB on every call – never prerender at build time.
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const interactionRows = await prisma.fieldInteraction.groupBy({
     by: ['fieldId'],
