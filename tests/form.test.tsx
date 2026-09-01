@@ -6,7 +6,7 @@ describe('Home page', () => {
   it('renders the fixed Glace form heading and main flow', () => {
     render(<HomePage />);
 
-    expect(screen.getByText(/dein gratis-glace/i)).toBeInTheDocument();
+    expect(screen.getByText(/deine gratis-glace/i)).toBeInTheDocument();
     expect(screen.getByText(/wer bist du\?/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /weiter/i })).toBeInTheDocument();
   });

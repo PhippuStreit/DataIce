@@ -183,7 +183,7 @@ Voraussetzung: `dig +short data.digidude.ch` liefert `88.198.172.8`.
 
 ```bash
 certbot --nginx -d data.digidude.ch \
-  --agree-tos -m philippe@streit.family --redirect --non-interactive
+  --agree-tos -m ps@nexplore.ch --redirect --non-interactive
 ```
 
 `--nginx` (nicht `certonly`) → Certbot schreibt den `443 ssl`-Block +

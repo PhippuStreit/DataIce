@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { formFields } from '@/lib/form-definition';
+import { formFields, type FormField } from '@/lib/form-definition';
 
 const initialData: Record<string, string | boolean> = {
   firstName: '',
@@ -43,6 +43,19 @@ export default function GlaceForm() {
   const updateField = (key: string, value: string | boolean) => {
     setData((prev) => ({ ...prev, [key]: value }));
   };
+
+  const isFieldComplete = (field: FormField): boolean => {
+    if (!field.required) return true;
+    const value = data[field.id];
+    if (field.type === 'checkbox') return value === true;
+    // privacyReading zählt nur als ausgefüllt, wenn "Ja" gewählt wurde
+    if (field.id === 'privacyReading') return value === 'Ja';
+    return typeof value === 'string' && value.trim().length > 0;
+  };
+
+  const isStepValid = visibleFields.every((fieldId) =>
+    isFieldComplete(formFields.find((item) => item.id === fieldId)!),
+  );
 
   const goNext = () => {
     setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
@@ -103,8 +116,8 @@ export default function GlaceForm() {
       <div className="w-full rounded-3xl bg-white p-5 shadow-soft">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-500">Data Ice</p>
-            <h1 className="mt-2 text-3xl font-bold text-slate-900">Dein Gratis-Glace</h1>
+            <img src="/nexplore.svg" alt="Nexplore" className="h-6 w-auto" />
+            <h1 className="mt-2 text-3xl font-bold text-slate-900">Deine Gratis-Glace</h1>
           </div>
           <span className="rounded-full bg-orange-100 px-3 py-1 text-sm font-medium text-orange-700">
             {currentStep + 1}/{steps.length}
@@ -134,14 +147,20 @@ export default function GlaceForm() {
                     onChange={(event) => updateField(field.id, event.target.checked)}
                     className="mt-1 h-5 w-5 accent-orange-500"
                   />
-                  <span className="text-sm text-slate-700">{field.label}</span>
+                  <span className="text-sm text-slate-700">
+                    {field.label}
+                    {field.required && <span className="text-orange-500"> *</span>}
+                  </span>
                 </label>
               );
             }
 
             return (
               <div key={field.id} className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">{field.label}</label>
+                <label className="text-sm font-medium text-slate-700">
+                  {field.label}
+                  {field.required && <span className="text-orange-500"> *</span>}
+                </label>
                 {field.options ? (
                   <div className="grid grid-cols-2 gap-2">
                     {field.options.map((option) => (
@@ -181,8 +200,8 @@ export default function GlaceForm() {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="flex-1 rounded-2xl bg-orange-500 px-4 py-3 font-semibold text-white disabled:opacity-60"
+              disabled={isSubmitting || !isStepValid}
+              className="flex-1 rounded-2xl bg-orange-500 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isSubmitting ? 'Wird gespeichert...' : 'Absenden'}
             </button>
@@ -190,7 +209,8 @@ export default function GlaceForm() {
             <button
               type="button"
               onClick={goNext}
-              className="flex-1 rounded-2xl bg-orange-500 px-4 py-3 font-semibold text-white"
+              disabled={!isStepValid}
+              className="flex-1 rounded-2xl bg-orange-500 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               Weiter
             </button>
