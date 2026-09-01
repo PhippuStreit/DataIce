@@ -1,0 +1,27 @@
+[Unit]
+Description=DataIce Application with Docker Compose
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/appuser/DataIce
+
+# Start
+ExecStart=/usr/local/bin/docker-compose -f docker-compose.prod.yml up -d --build
+
+# Stop
+ExecStop=/usr/local/bin/docker-compose -f docker-compose.prod.yml down
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+
+# Security
+User=appuser
+Group=docker
+
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
