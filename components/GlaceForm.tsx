@@ -25,7 +25,7 @@ export default function GlaceForm() {
   const [data, setData] = useState<Record<string, string | boolean>>(initialData);
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const steps = useMemo(
@@ -68,7 +68,6 @@ export default function GlaceForm() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setSubmitError(null);
-    setSubmitMessage(null);
 
     const payload = {
       sessionId: 'mobile-session',
@@ -97,10 +96,7 @@ export default function GlaceForm() {
         return;
       }
 
-      setSubmitMessage('✓ Formular erfolgreich gespeichert!');
-      setData(initialData);
-      setCurrentStep(0);
-      setTimeout(() => setSubmitMessage(null), 3000);
+      setIsSubmitted(true);
     } catch (error) {
       setSubmitError('Verbindung fehlgeschlagen. Bitte versuche es erneut.');
       console.error('Submit error:', error);
@@ -110,6 +106,26 @@ export default function GlaceForm() {
   };
 
   const isLastStep = currentStep === steps.length - 1;
+
+  if (isSubmitted) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-md items-center justify-center px-4 py-8">
+        <div className="w-full rounded-3xl bg-white p-8 text-center shadow-soft">
+          <img src="/nexplore.svg" alt="Nexplore" className="mx-auto h-8 w-auto" />
+          <h1 className="mt-8 text-4xl font-bold text-slate-900">Merci viumau</h1>
+          <p className="mt-4 text-slate-600">Deine Angaben sind gespeichert.</p>
+          <a
+            href="https://www.nexplore.ch"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-8 inline-block rounded-2xl bg-orange-500 px-6 py-3 font-semibold text-white"
+          >
+            www.nexplore.ch
+          </a>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md items-center justify-center px-4 py-8">
@@ -216,12 +232,6 @@ export default function GlaceForm() {
             </button>
           )}
         </div>
-
-        {submitMessage && (
-          <div className="mt-4 rounded-2xl bg-green-100 p-4 text-green-800">
-            {submitMessage}
-          </div>
-        )}
 
         {submitError && (
           <div className="mt-4 rounded-2xl bg-red-100 p-4 text-red-800">
