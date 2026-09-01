@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fffaf5;
+  --foreground: #1f2937;
+  --card: #ffffff;
+  --primary: #f97316;
+  --primary-soft: #ffedd5;
+  --border: #fed7aa;
+  --text-soft: #4b5563;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #fffaf5 0%, #fff7ed 100%);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+@layer components {
+  .touch-button {
+    @apply min-h-[48px] rounded-2xl border border-orange-200 bg-white px-4 py-3 text-left text-sm font-medium text-slate-700 shadow-sm transition active:scale-[0.98];
+  }
+
+  .touch-button-selected {
+    @apply border-orange-500 bg-orange-50 text-orange-900 shadow-soft;
+  }
+}

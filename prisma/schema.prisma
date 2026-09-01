@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Submission {
+  id                String              @id @default(uuid())
+  sessionId         String
+  correlationId     String
+  createdAt         DateTime            @default(now())
+  submittedAt       DateTime?           @default(now())
+  completedAt       DateTime?
+  firstName         String
+  company           String
+  role              String
+  yearsExperience   String
+  postalCode        String
+  favoriteFlavor    String
+  visitReason       String
+  operatingSystem   String
+  appCount          String
+  passwordManager   String
+  privacyReading    Boolean
+  phoneNumber       String
+  iceName           String
+  newsletter        Boolean             @default(false)
+  termsAccepted     Boolean             @default(false)
+  fieldInteractions FieldInteraction[]
+}
+
+model FieldInteraction {
+  id              String     @id @default(uuid())
+  submissionId    String
+  fieldId         String
+  fieldName       String
+  interactionType String
+  startedAt       DateTime?
+  endedAt         DateTime?
+  durationMs      Int        @default(0)
+  value           String?
+  submission      Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id            String   @id @default(uuid())
+  sessionId     String   @unique
+  createdAt     DateTime @default(now())
+  lastActivityAt DateTime @default(now())
+  userAgent     String?
+  platform      String?
+  screenSize    String?
+  interactionCount Int    @default(0)
+}
