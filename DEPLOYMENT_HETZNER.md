@@ -36,7 +36,7 @@ ssh root@88.198.172.8
 # Auf dem Server (nach Login mit Passwort):
 mkdir -p ~/.ssh
 cat >> ~/.ssh/authorized_keys << 'EOF'
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKx7z8+... philippe@streit.family
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKx7z8+... ps@nexplore.ch
 EOF
 
 chmod 700 ~/.ssh
@@ -423,7 +423,7 @@ docker-compose exec web npx prisma studio
    
    mkdir -p ~/.ssh
    cat >> ~/.ssh/authorized_keys << 'EOF'
-   ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKx7z8+... philippe@streit.family
+   ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKx7z8+... ps@nexplore.ch
    EOF
    chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
    exit
