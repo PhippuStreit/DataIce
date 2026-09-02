@@ -29,9 +29,13 @@ Represents one completed or partially completed form instance.
 | privacyReading | enum | required | always / sometimes / never / unknown |
 | phoneNumber | string | optional | optional contact |
 | iceName | string | optional | deprecated 2026-09-02, no longer collected; column kept nullable |
-| newsletterConsent | boolean | required | false until double opt-in |
+| favoriteFlavor | string | required | Mehrfachauswahl, kommasepariert (Spargelglace/Vegan/Rahmglace/Sorbet) |
+| newsletterConsent | boolean | required | Checkbox vorausgewählt (Entscheid 2026-09-02) |
 | newsletterConfirmedAt | datetime | optional | confirmation timestamp |
 | termsAccepted | boolean | required | required check |
+| pickupCode | string | optional | zufälliger Abhol-Code `GLACE-XXXX-XXXX`, auch als QR im Abschluss-Screen |
+| termsOpened | boolean | required | wurde das Nutzungsbedingungen-Overlay geöffnet |
+| termsViewMs | int | optional | kumulierte Verweildauer im Overlay |
 
 #### Erfasster Besucher-Kontext (implementiert 2026-09-02)
 

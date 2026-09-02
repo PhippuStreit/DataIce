@@ -4,6 +4,8 @@ export type FormField = {
   type: 'text' | 'select' | 'radio' | 'checkbox' | 'slider';
   required?: boolean;
   options?: string[];
+  multiple?: boolean;
+  hint?: string;
   placeholder?: string;
   min?: number;
   max?: number;
@@ -16,7 +18,7 @@ export const formFields: FormField[] = [
   { id: 'role', label: 'Welche Rolle hast du?', type: 'select', required: true, options: ['Marketing', 'Vertrieb', 'Operations', 'Management'] },
   { id: 'yearsExperience', label: 'Wie viele Jahre Erfahrung?', type: 'slider', required: true, min: 1, max: 60, unit: 'Jahre' },
   { id: 'postalCode', label: 'Postleitzahl', type: 'text', required: true, placeholder: 'PLZ' },
-  { id: 'favoriteFlavor', label: 'Deine Lieblings-Glace?', type: 'select', required: true, options: ['Vanille', 'Schokolade', 'Erdbeere', 'Straciatella'] },
+  { id: 'favoriteFlavor', label: 'Deine Lieblings-Glace?', type: 'select', required: true, multiple: true, hint: 'Mehrfachauswahl möglich', options: ['Spargelglace', 'Vegan', 'Rahmglace', 'Sorbet'] },
   { id: 'visitReason', label: 'Warum bist du hier?', type: 'select', required: true, options: ['Networking', 'Digitale Transformation', 'KI', 'Horizonterweiterung'] },
   { id: 'appCount', label: 'Wie viele Apps auf deinem Handy nutzt du?', type: 'select', required: true, options: ['1-5', '6-10', '11-20', '20+'] },
   { id: 'passwordManager', label: 'Nutzt du einen Passwortmanager?', type: 'select', required: true, options: ['Ja', 'Nein', 'Ich weiss nicht'] },

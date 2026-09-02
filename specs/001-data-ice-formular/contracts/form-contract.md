@@ -14,16 +14,21 @@ Request
     "role": "fachkraft",
     "yearsExperience": "12",
     "postalCode": "36",
-    "iceCream": "vanille",
-    "transport": "auto",
+    "favoriteFlavor": "Vegan, Sorbet",
     "os": "iOS",
     "appCount": "20-50",
     "passwordManager": "ja",
     "privacyReading": "manchmal",
     "phoneNumber": "+41790000000",
-    "newsletterConsent": false,
+    "newsletter": true,
     "termsAccepted": true
   },
+  "pickupCode": "GLACE-7Q2M-K4XR",
+  "termsOpened": true,
+  "termsViewMs": 8200,
+  "context": { "timezone": "Europe/Zurich", "screenWidth": 390 },
+  "events": [],
+  "fieldStats": [],
   "interactions": [
     {
       "fieldId": "field_3_role",
@@ -55,7 +60,10 @@ Validation requirements:
 - `yearsExperience` is a slider value; integer 1–60 sent as string.
 - `os` is set by the client from the browser (User-Agent / `navigator.userAgentData`); it is not a form question.
 - `iceName` is no longer sent (deprecated 2026-09-02).
-- `newsletterConsent` must not be active until double-opt-in confirmation is completed.
+- `favoriteFlavor` is a comma-separated multi-select (Spargelglace / Vegan / Rahmglace / Sorbet).
+- `newsletter` defaults to `true` (checkbox pre-checked).
+- `pickupCode` is a client-generated random code shown as QR on the completion screen.
+- `termsOpened` / `termsViewMs` track whether and how long the terms overlay was viewed.
 
 ## GET /api/stats
 

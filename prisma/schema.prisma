@@ -32,6 +32,13 @@ model Submission {
   newsletter        Boolean            @default(false)
   termsAccepted     Boolean            @default(false)
 
+  // Abhol-Bestätigung
+  pickupCode        String?
+
+  // Nutzungsbedingungen-Interaktion
+  termsOpened       Boolean            @default(false)
+  termsViewMs       Int?
+
   // Netz / Server-seitig erfasst
   ipAddress         String?
   forwardedFor      String?

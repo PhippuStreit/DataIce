@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import QRCode from 'qrcode';
 import { formFields, type FormField } from '@/lib/form-definition';
 import { collectClientContext, createFieldTracker, type FieldTracker } from '@/lib/telemetry';
+import TermsOverlay from '@/components/TermsOverlay';
 
 const newId = (): string => {
   try {
@@ -11,6 +13,14 @@ const newId = (): string => {
     // ignore
   }
   return `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
+// Zufälliger Abhol-Code für die Bestätigung am Stand.
+const newPickupCode = (): string => {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const block = () =>
+    Array.from({ length: 4 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
+  return `GLACE-${block()}-${block()}`;
 };
 
 const initialData: Record<string, string | boolean> = {
@@ -25,7 +35,7 @@ const initialData: Record<string, string | boolean> = {
   passwordManager: '',
   privacyReading: '',
   phoneNumber: '',
-  newsletter: false,
+  newsletter: true,
   termsAccepted: false,
 };
 
@@ -49,6 +59,16 @@ export default function GlaceForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showTerms, setShowTerms] = useState(false);
+  const [qrSvg, setQrSvg] = useState<string | null>(null);
+
+  const pickupCodeRef = useRef<string>();
+  if (!pickupCodeRef.current) pickupCodeRef.current = newPickupCode();
+
+  // Nutzungsbedingungen-Interaktion
+  const termsOpenedRef = useRef(false);
+  const termsViewMsRef = useRef(0);
+  const termsOpenAtRef = useRef<number | null>(null);
 
   const steps = useMemo(
     () => [
@@ -106,9 +126,43 @@ export default function GlaceForm() {
     setCurrentStep((step) => Math.max(step - 1, 0));
   };
 
+  const openTerms = () => {
+    termsOpenedRef.current = true;
+    termsOpenAtRef.current = Date.now();
+    trackerRef.current?.terms('open');
+    setShowTerms(true);
+  };
+
+  const closeTerms = () => {
+    if (termsOpenAtRef.current != null) {
+      termsViewMsRef.current += Date.now() - termsOpenAtRef.current;
+      termsOpenAtRef.current = null;
+    }
+    trackerRef.current?.terms('close');
+    setShowTerms(false);
+  };
+
+  // Mehrfachauswahl: kommaseparierter String im State.
+  const toggleMulti = (fieldId: string, option: string) => {
+    const current = String(data[fieldId] ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const next = current.includes(option)
+      ? current.filter((o) => o !== option)
+      : [...current, option];
+    updateField(fieldId, next.join(', '));
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setSubmitError(null);
+
+    // Falls die Bedingungen beim Absenden noch offen sind: Zeit mitzählen.
+    if (termsOpenAtRef.current != null) {
+      termsViewMsRef.current += Date.now() - termsOpenAtRef.current;
+      termsOpenAtRef.current = null;
+    }
 
     trackerRef.current?.submit();
     const telemetry = trackerRef.current?.build(data);
@@ -123,6 +177,9 @@ export default function GlaceForm() {
         termsAccepted: Boolean(data.termsAccepted),
       },
       context: contextRef.current,
+      pickupCode: pickupCodeRef.current,
+      termsOpened: termsOpenedRef.current,
+      termsViewMs: termsViewMsRef.current,
       totalDurationMs: telemetry?.totalDurationMs,
       interactionCount: telemetry?.interactionCount,
       events: telemetry?.events,
@@ -157,6 +214,19 @@ export default function GlaceForm() {
 
   const isLastStep = currentStep === steps.length - 1;
 
+  // QR-Code für die Abhol-Bestätigung erzeugen, sobald das Formular abgeschickt ist.
+  useEffect(() => {
+    if (!isSubmitted) return;
+    QRCode.toString(pickupCodeRef.current ?? '', {
+      type: 'svg',
+      margin: 1,
+      width: 200,
+      color: { dark: '#0f172a', light: '#ffffff' },
+    })
+      .then(setQrSvg)
+      .catch(() => setQrSvg(null));
+  }, [isSubmitted]);
+
   if (isSubmitted) {
     return (
       <main className="mx-auto flex min-h-screen max-w-md items-center justify-center px-4 py-8">
@@ -164,6 +234,22 @@ export default function GlaceForm() {
           <img src="/nexplore.svg" alt="Nexplore" className="mx-auto h-8 w-auto" />
           <h1 className="mt-8 text-4xl font-bold text-slate-900">Merci viumau</h1>
           <p className="mt-4 text-slate-600">Deine Angaben sind gespeichert.</p>
+
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-sm font-medium text-slate-700">Zeig das am Stand vor:</p>
+            {qrSvg ? (
+              <div
+                className="mx-auto mt-3 h-44 w-44 [&>svg]:h-full [&>svg]:w-full"
+                dangerouslySetInnerHTML={{ __html: qrSvg }}
+              />
+            ) : (
+              <div className="mx-auto mt-3 h-44 w-44 animate-pulse rounded-xl bg-slate-200" />
+            )}
+            <p className="mt-3 font-mono text-sm tracking-wider text-slate-900">
+              {pickupCodeRef.current}
+            </p>
+          </div>
+
           <a
             href="https://www.nexplore.ch"
             target="_blank"
@@ -214,7 +300,23 @@ export default function GlaceForm() {
                     className="mt-1 h-5 w-5 accent-orange-500"
                   />
                   <span className="text-sm text-slate-700">
-                    {field.label}
+                    {field.id === 'termsAccepted' ? (
+                      <>
+                        Ich akzeptiere die{' '}
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            openTerms();
+                          }}
+                          className="font-medium text-orange-600 underline"
+                        >
+                          Glace-Nutzungsbedingungen
+                        </button>
+                      </>
+                    ) : (
+                      field.label
+                    )}
                     {field.required && <span className="text-orange-500"> *</span>}
                   </span>
                 </label>
@@ -258,24 +360,39 @@ export default function GlaceForm() {
               );
             }
 
+            const multiSelected = String(value)
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean);
+
             return (
               <div key={field.id} className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">
                   {field.label}
                   {field.required && <span className="text-orange-500"> *</span>}
                 </label>
+                {field.hint && <p className="text-xs text-slate-400">{field.hint}</p>}
                 {field.options ? (
                   <div className="grid grid-cols-2 gap-2">
-                    {field.options.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        className={`touch-button ${value === option ? 'touch-button-selected' : ''}`}
-                        onClick={() => updateField(field.id, option)}
-                      >
-                        {option}
-                      </button>
-                    ))}
+                    {field.options.map((option) => {
+                      const selected = field.multiple
+                        ? multiSelected.includes(option)
+                        : value === option;
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          className={`touch-button ${selected ? 'touch-button-selected' : ''}`}
+                          onClick={() =>
+                            field.multiple
+                              ? toggleMulti(field.id, option)
+                              : updateField(field.id, option)
+                          }
+                        >
+                          {option}
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : (
                   <input
@@ -328,6 +445,8 @@ export default function GlaceForm() {
           </div>
         )}
       </div>
+
+      <TermsOverlay open={showTerms} onClose={closeTerms} />
     </main>
   );
 }

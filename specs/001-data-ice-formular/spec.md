@@ -37,6 +37,13 @@ Die in TRK-001…007 beschriebene Datenerfassung ist jetzt implementiert (vorher
 - Entscheid: **keine Anonymisierung** der IP, **kein Consent-Gate** – Offenlegung/Aufbewahrung liegt bei Nexplore (siehe FR-016).
 - Telemetrie ist "best effort": fehlerhafte oder fehlende Tracking-Daten dürfen das Speichern der Antworten nie verhindern.
 
+### Session 2026-09-02 – Abschluss, Glacesorten, Bedingungen
+
+- Abschluss-Screen zeigt unter "Merci viumau" einen **zufällig generierten QR-Code** (Abhol-Code `GLACE-XXXX-XXXX`) plus Code im Klartext. Der Code wird auf der `Submission` gespeichert (`pickupCode`).
+- `favoriteFlavor`: Optionen jetzt **Spargelglace, Vegan, Rahmglace, Sorbet** mit **Mehrfachauswahl**. Speicherung als kommaseparierter String.
+- `newsletter`: Checkbox ist **vorausgewählt** (überschreibt die "false bis Double-Opt-In"-Erwartung aus FR-015 bewusst).
+- `termsAccepted`: Label verlinkt auf **Glace-Nutzungsbedingungen**, die in einem Overlay eingeblendet werden (humoristischer Inhalt, u. a. die Aufforderung, am Event jemandem ein ehrliches Kompliment zu machen). Getrackt wird, **ob** das Overlay geöffnet wurde (`termsOpened`) und die **kumulierte Verweildauer** darauf (`termsViewMs`); zusätzlich open/close als Events im Stream.
+
 **Input**: User description: "Umsetzung des bereits definierten Glace-Formulars aus der Bauanleitung als feste digitale Lösung. Das Formular selbst ist fertig definiert und wird nicht vom Nutzer erstellt, sondern direkt als feste Programmierung gemäß Bauanleitung umgesetzt. Es soll für mobile Nutzung optimiert sein, eine einfache Datenbank hinter sich haben und intern leicht wartbar bleiben, ohne dass ein komplexer dynamischer Builder gebaut wird. Das UI soll sehr einfach zum Ausfüllen sein: möglichst nur Clicks, Buttons und Auswahlen – keine Texteingabe. Alle Interaktionen werden getracked: Feldaufruf, Zeit pro Feld (bis Weiterdrücken), Interaktionstyp, Zeitstempel."
 
 ## Formulardefinition gemäß Bauanleitung (Source of Truth)

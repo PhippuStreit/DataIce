@@ -149,6 +149,18 @@ export function createFieldTracker(steps: string[][]) {
         value: String(stepIndex),
       });
     },
+    terms(action: 'open' | 'close') {
+      events.push({
+        sequence: seq++,
+        stepIndex: null,
+        fieldId: '__terms__',
+        fieldName: 'Glace-Nutzungsbedingungen',
+        eventType: action === 'open' ? 'focus' : 'blur',
+        interactionType: 'terms',
+        at: new Date().toISOString(),
+        value: action,
+      });
+    },
     submit() {
       events.push({
         sequence: seq++,

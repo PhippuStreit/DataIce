@@ -38,8 +38,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const { sessionId, correlationId, data, context, events, fieldStats, totalDurationMs, interactionCount } =
-      parsed.data;
+    const {
+      sessionId,
+      correlationId,
+      data,
+      context,
+      events,
+      fieldStats,
+      totalDurationMs,
+      interactionCount,
+      pickupCode,
+      termsOpened,
+      termsViewMs,
+    } = parsed.data;
     const server = readServerContext(request);
     const ctx = context ?? {};
 
@@ -63,6 +74,9 @@ export async function POST(request: Request) {
         phoneNumber: data.phoneNumber,
         newsletter: Boolean(data.newsletter),
         termsAccepted: Boolean(data.termsAccepted),
+        pickupCode: pickupCode ?? null,
+        termsOpened: Boolean(termsOpened),
+        termsViewMs: int(termsViewMs),
 
         // Server-seitig
         ipAddress: server.ipAddress,
