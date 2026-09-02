@@ -3,9 +3,23 @@ node_modules
 .git
 .gitignore
 .env
+.env.*
 .env.local
 npm-debug.log*
 Dockerfile
 .dockerignore
 coverage
 *.log
+
+# Kein verschachtelter Klon im Build-Context (bricht sonst tsc)
+DataIce/
+**/DataIce/
+
+# Deploy-/Doku-Kram, nicht nötig fürs Image
+deploy.sh
+DEPLOYMENT_HETZNER.md
+dataice.service
+submissions.csv
+specs/
+.specify/
+tests/
