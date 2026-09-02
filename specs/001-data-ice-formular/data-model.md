@@ -19,16 +19,16 @@ Represents one completed or partially completed form instance.
 | firstName | string | optional | limited, user-supplied |
 | company | string | optional | company picker / free value |
 | role | enum | required | mapped from fixed options |
-| yearsExperience | enum | required | mapped from fixed options |
+| yearsExperience | int (1–60) | required | slider value, stored as numeric string |
 | postalCode | string | required | first 2 digits only |
 | iceCream | enum | required | fixed options |
 | transport | enum | required | fixed options |
-| os | enum | required | iPhone / Android |
+| os | string | required | auto-detected from browser, not asked |
 | appCount | enum | required | option bucket |
 | passwordManager | enum | required | yes / no / unknown |
 | privacyReading | enum | required | always / sometimes / never / unknown |
 | phoneNumber | string | optional | optional contact |
-| iceName | string | optional | optional alias / gaming field |
+| iceName | string | optional | deprecated 2026-09-02, no longer collected; column kept nullable |
 | newsletterConsent | boolean | required | false until double opt-in |
 | newsletterConfirmedAt | datetime | optional | confirmation timestamp |
 | termsAccepted | boolean | required | required check |

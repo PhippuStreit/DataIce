@@ -12,16 +12,15 @@ Request
     "firstName": "Sabine",
     "company": "Nexplore",
     "role": "fachkraft",
-    "yearsExperience": "5-15",
+    "yearsExperience": "12",
     "postalCode": "36",
     "iceCream": "vanille",
     "transport": "auto",
-    "os": "iphone",
+    "os": "iOS",
     "appCount": "20-50",
     "passwordManager": "ja",
     "privacyReading": "manchmal",
     "phoneNumber": "+41790000000",
-    "iceName": "S-Minou-Bergstrasse",
     "newsletterConsent": false,
     "termsAccepted": true
   },
@@ -53,6 +52,9 @@ Response
 Validation requirements:
 - `termsAccepted` must be true.
 - all required fields must be present and valid.
+- `yearsExperience` is a slider value; integer 1–60 sent as string.
+- `os` is set by the client from the browser (User-Agent / `navigator.userAgentData`); it is not a form question.
+- `iceName` is no longer sent (deprecated 2026-09-02).
 - `newsletterConsent` must not be active until double-opt-in confirmation is completed.
 
 ## GET /api/stats

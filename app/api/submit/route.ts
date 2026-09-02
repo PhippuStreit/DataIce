@@ -43,7 +43,6 @@ export async function POST(request: Request) {
         passwordManager: data.passwordManager,
         privacyReading: data.privacyReading === 'Ja',
         phoneNumber: data.phoneNumber,
-        iceName: data.iceName,
         newsletter: Boolean(data.newsletter),
         termsAccepted: Boolean(data.termsAccepted),
       },

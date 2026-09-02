@@ -17,6 +17,15 @@
 - Anpassung: Nach erfolgreichem Absenden erscheint ein Abschluss-Screen ("Merci viumau", Nexplore-Logo, Link zu www.nexplore.ch) statt eines Auto-Resets zurück auf Schritt 1.
 - Anpassung: Die Anwendung tritt unter Nexplore-Branding auf (Logo im Header, Seitentitel).
 
+### Session 2026-09-02 – Feldüberarbeitung
+- `yearsExperience` ("Wie viele Jahre Erfahrung?"): Auswahl-Buttons → Slider von 1 bis 60 (Jahre). Speicherung als Zahl-String.
+- Alle "ß" werden durch "ss" ersetzt (CH-Schreibweise), z. B. Option "Ich weiss nicht".
+- `visitReason` ("Warum bist du hier?"): neue Optionen "Networking", "Digitale Transformation", "KI", "Horizonterweiterung".
+- `operatingSystem`: wird nicht mehr abgefragt, sondern clientseitig aus dem Browser (User-Agent / `navigator.userAgentData`) ermittelt und mitgespeichert.
+- `appCount`: Label "Wie viele Apps nutzt du?" → "Wie viele Apps auf deinem Handy nutzt du?".
+- `passwordManager`: Label "Passwortmanager?" → "Nutzt du einen Passwortmanager?".
+- `iceName` ("Name deiner Glace"): Frage entfernt. DB-Spalte bleibt nullable für Altdaten erhalten.
+
 **Input**: User description: "Umsetzung des bereits definierten Glace-Formulars aus der Bauanleitung als feste digitale Lösung. Das Formular selbst ist fertig definiert und wird nicht vom Nutzer erstellt, sondern direkt als feste Programmierung gemäß Bauanleitung umgesetzt. Es soll für mobile Nutzung optimiert sein, eine einfache Datenbank hinter sich haben und intern leicht wartbar bleiben, ohne dass ein komplexer dynamischer Builder gebaut wird. Das UI soll sehr einfach zum Ausfüllen sein: möglichst nur Clicks, Buttons und Auswahlen – keine Texteingabe. Alle Interaktionen werden getracked: Feldaufruf, Zeit pro Feld (bis Weiterdrücken), Interaktionstyp, Zeitstempel."
 
 ## Formulardefinition gemäß Bauanleitung (Source of Truth)
@@ -277,6 +286,9 @@ Das Entwicklungsteam muss das Glace-Formular in einer klaren und wartbaren Weise
 - **FR-015**: Newsletter-Consent MUSS erst nach erfolgreichem Double-Opt-In aktiviert werden; unbestätigte Einwilligungen DÜRFEN nicht als Marketing-Subscription gelten.
 - **FR-016**: In der ersten Version gibt es keinen Selbstbedienungs-Delete-Flow; personenbezogene Daten bleiben bis zum Ablauf der definierten Aufbewahrungsdauer gespeichert und werden nur durch manuelle Admin-Action bereinigt.
 - **FR-017**: Die Anwendung MUSS unter Nexplore-Branding auftreten: Nexplore-Logo im Formular-Header und im Abschluss-Screen, Nexplore im Seitentitel. Das ausgelieferte Logo (`public/nexplore.svg`) ist durch das offizielle Asset zu ersetzen.
+- **FR-018**: Das Betriebssystem DARF nicht als Formularfrage erscheinen; es MUSS clientseitig aus dem Browser ermittelt (User-Agent / `navigator.userAgentData`) und mit dem Datensatz gespeichert werden. Ist keine Erkennung möglich, wird "Unbekannt" gespeichert.
+- **FR-019**: Die Berufserfahrung MUSS über einen Slider von 1 bis 60 (Jahre) erfasst werden.
+- **FR-020**: Nutzertexte MÜSSEN Schweizer Schreibweise verwenden (kein "ß").
 
 ### UI/UX Requirements – Interaction Pattern
 

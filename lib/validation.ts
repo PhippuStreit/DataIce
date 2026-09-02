@@ -4,18 +4,24 @@ export const formDataSchema = z.object({
   firstName: z.string().min(1, 'Bitte gib deinen Vornamen ein.'),
   company: z.string().min(1, 'Bitte gib deinen Firmennamen ein.'),
   role: z.string().min(1, 'Bitte wähle deine Rolle.'),
-  yearsExperience: z.string().min(1, 'Bitte gib deine Berufserfahrung ein.'),
+  yearsExperience: z
+    .string()
+    .min(1, 'Bitte wähle deine Berufserfahrung.')
+    .refine((value) => {
+      const n = Number(value);
+      return Number.isFinite(n) && n >= 1 && n <= 60;
+    }, 'Bitte wähle einen Wert zwischen 1 und 60 Jahren.'),
   postalCode: z.string().min(1, 'Bitte gib deine Postleitzahl ein.'),
   favoriteFlavor: z.string().min(1, 'Bitte wähle deine Lieblings-Glace.'),
   visitReason: z.string().min(1, 'Bitte wähle einen Grund für deinen Besuch.'),
-  operatingSystem: z.string().min(1, 'Bitte wähle dein Betriebssystem.'),
+  // Wird clientseitig aus dem Browser ermittelt, nicht abgefragt.
+  operatingSystem: z.string().min(1),
   appCount: z.string().min(1, 'Bitte wähle eine Anzahl.'),
   passwordManager: z.string().min(1, 'Bitte wähle eine Option.'),
   privacyReading: z.string().refine((value) => value === 'Ja', {
     message: 'Bitte akzeptiere die Datenschutzerklärung.',
   }),
   phoneNumber: z.string().min(1, 'Bitte gib deine Handynummer ein.'),
-  iceName: z.string().min(1, 'Bitte gib den Namen für deine Glace ein.'),
   newsletter: z.boolean().optional(),
   termsAccepted: z.boolean().refine((value) => value === true, {
     message: 'Bitte akzeptiere die Bedingungen.',

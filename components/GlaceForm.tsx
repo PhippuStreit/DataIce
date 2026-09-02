@@ -11,14 +11,26 @@ const initialData: Record<string, string | boolean> = {
   postalCode: '',
   favoriteFlavor: '',
   visitReason: '',
-  operatingSystem: '',
   appCount: '',
   passwordManager: '',
   privacyReading: '',
   phoneNumber: '',
-  iceName: '',
   newsletter: false,
   termsAccepted: false,
+};
+
+// Betriebssystem aus dem Browser ableiten statt abfragen.
+const detectOperatingSystem = (): string => {
+  if (typeof navigator === 'undefined') return 'Unbekannt';
+  const uaPlatform = (navigator as unknown as { userAgentData?: { platform?: string } }).userAgentData?.platform;
+  if (uaPlatform) return uaPlatform;
+  const ua = navigator.userAgent || '';
+  if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
+  if (/Android/i.test(ua)) return 'Android';
+  if (/Windows/i.test(ua)) return 'Windows';
+  if (/Mac OS X|Macintosh/i.test(ua)) return 'macOS';
+  if (/Linux/i.test(ua)) return 'Linux';
+  return 'Unbekannt';
 };
 
 export default function GlaceForm() {
@@ -31,9 +43,9 @@ export default function GlaceForm() {
   const steps = useMemo(
     () => [
       ['firstName', 'company', 'role', 'yearsExperience'],
-      ['postalCode', 'favoriteFlavor', 'visitReason', 'operatingSystem'],
-      ['appCount', 'passwordManager', 'privacyReading', 'phoneNumber'],
-      ['iceName', 'newsletter', 'termsAccepted'],
+      ['postalCode', 'favoriteFlavor', 'visitReason', 'appCount'],
+      ['passwordManager', 'privacyReading', 'phoneNumber'],
+      ['newsletter', 'termsAccepted'],
     ],
     [],
   );
@@ -74,6 +86,7 @@ export default function GlaceForm() {
       correlationId: 'corr-mobile',
       data: {
         ...data,
+        operatingSystem: detectOperatingSystem(),
         newsletter: Boolean(data.newsletter),
         termsAccepted: Boolean(data.termsAccepted),
       },
@@ -168,6 +181,41 @@ export default function GlaceForm() {
                     {field.required && <span className="text-orange-500"> *</span>}
                   </span>
                 </label>
+              );
+            }
+
+            if (field.type === 'slider') {
+              const min = field.min ?? 0;
+              const max = field.max ?? 100;
+              const hasValue = typeof value === 'string' && value !== '';
+              const current = hasValue ? Number(value) : min;
+              return (
+                <div key={field.id} className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    {field.label}
+                    {field.required && <span className="text-orange-500"> *</span>}
+                  </label>
+                  <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <input
+                      type="range"
+                      min={min}
+                      max={max}
+                      step={1}
+                      value={current}
+                      onChange={(event) => updateField(field.id, event.target.value)}
+                      onPointerDown={() => {
+                        if (!hasValue) updateField(field.id, String(current));
+                      }}
+                      className="h-2 w-full accent-orange-500"
+                    />
+                    <span className="w-20 shrink-0 text-right text-lg font-semibold text-slate-900">
+                      {hasValue ? `${current}${field.unit ? ` ${field.unit}` : ''}` : '–'}
+                    </span>
+                  </div>
+                  {!hasValue && (
+                    <p className="text-xs text-slate-400">Regler bewegen, um zu wählen ({min}–{max}).</p>
+                  )}
+                </div>
               );
             }
 

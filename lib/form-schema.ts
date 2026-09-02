@@ -12,7 +12,6 @@ export const formSchema = {
     'passwordManager',
     'privacyReading',
     'phoneNumber',
-    'iceName',
     'newsletter',
     'termsAccepted',
   ],

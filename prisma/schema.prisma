@@ -26,7 +26,7 @@ model Submission {
   passwordManager   String
   privacyReading    Boolean
   phoneNumber       String
-  iceName           String
+  iceName           String?             // Nicht mehr abgefragt (2026-09-02), Spalte für Altdaten behalten
   newsletter        Boolean             @default(false)
   termsAccepted     Boolean             @default(false)
   fieldInteractions FieldInteraction[]
