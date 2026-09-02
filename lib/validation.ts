@@ -27,17 +27,84 @@ export const formDataSchema = z.object({
   }),
 });
 
+// Telemetrie ist optional und lenient: fehlerhafte Tracking-Daten dürfen
+// das Speichern der Formularantworten nie verhindern.
+const clientContextSchema = z
+  .object({
+    screenWidth: z.number().optional(),
+    screenHeight: z.number().optional(),
+    viewportWidth: z.number().optional(),
+    viewportHeight: z.number().optional(),
+    pixelRatio: z.number().optional(),
+    colorDepth: z.number().optional(),
+    touchCapable: z.boolean().optional(),
+    maxTouchPoints: z.number().optional(),
+    orientation: z.string().optional(),
+    clientLanguages: z.string().optional(),
+    timezone: z.string().optional(),
+    utcOffsetMinutes: z.number().optional(),
+    clientTime: z.string().optional(),
+    referrer: z.string().optional(),
+    entryUrl: z.string().optional(),
+    connectionType: z.string().optional(),
+    connectionDownlink: z.number().optional(),
+    deviceMemoryGb: z.number().optional(),
+    hardwareConcurrency: z.number().optional(),
+    userAgent: z.string().optional(),
+  })
+  .partial()
+  .passthrough();
+
+const fieldEventSchema = z
+  .object({
+    sequence: z.number().optional(),
+    stepIndex: z.number().nullable().optional(),
+    fieldId: z.string(),
+    fieldName: z.string().optional(),
+    eventType: z.string(),
+    interactionType: z.string().optional(),
+    at: z.string().optional(),
+    value: z.string().nullable().optional(),
+  })
+  .passthrough();
+
+const fieldStatSchema = z
+  .object({
+    fieldId: z.string(),
+    fieldName: z.string().optional(),
+    interactionType: z.string().optional(),
+    stepIndex: z.number().nullable().optional(),
+    firstViewedAt: z.string().nullable().optional(),
+    answeredAt: z.string().nullable().optional(),
+    timeToAnswerMs: z.number().optional(),
+    focusMs: z.number().optional(),
+    changeCount: z.number().optional(),
+    focusCount: z.number().optional(),
+    finalValue: z.string().nullable().optional(),
+  })
+  .passthrough();
+
 export const submissionSchema = z.object({
   sessionId: z.string().min(1),
   correlationId: z.string().min(1),
   data: formDataSchema,
-  interactions: z.array(z.object({
-    fieldId: z.string(),
-    fieldName: z.string(),
-    interactionType: z.string(),
-    startedAt: z.string().optional(),
-    endedAt: z.string().optional(),
-    durationMs: z.number().optional(),
-    value: z.string().optional(),
-  })).optional(),
+  context: clientContextSchema.optional(),
+  totalDurationMs: z.number().optional(),
+  interactionCount: z.number().optional(),
+  events: z.array(fieldEventSchema).optional(),
+  fieldStats: z.array(fieldStatSchema).optional(),
+  // Legacy-Feld, weiterhin akzeptiert:
+  interactions: z
+    .array(
+      z.object({
+        fieldId: z.string(),
+        fieldName: z.string(),
+        interactionType: z.string(),
+        startedAt: z.string().optional(),
+        endedAt: z.string().optional(),
+        durationMs: z.number().optional(),
+        value: z.string().optional(),
+      }),
+    )
+    .optional(),
 });

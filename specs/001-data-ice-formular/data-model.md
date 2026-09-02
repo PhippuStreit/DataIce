@@ -33,24 +33,59 @@ Represents one completed or partially completed form instance.
 | newsletterConfirmedAt | datetime | optional | confirmation timestamp |
 | termsAccepted | boolean | required | required check |
 
+#### Erfasster Besucher-Kontext (implementiert 2026-09-02)
+
+Zusätzlich zu den Antworten speichert jede `Submission` den technischen Kontext des Erfassers:
+
+| Gruppe | Felder |
+|---|---|
+| Netz / Server | `ipAddress`, `forwardedFor`, `userAgent`, `acceptLanguage` |
+| UA geparst | `browserName`, `browserVersion`, `engineName`, `osName`, `osVersion`, `deviceType`, `deviceVendor`, `deviceModel`, `isBot` |
+| Gerät & Anzeige (Client) | `screenWidth/Height`, `viewportWidth/Height`, `pixelRatio`, `colorDepth`, `touchCapable`, `maxTouchPoints`, `orientation` |
+| Sprache & Zeit | `clientLanguages`, `timezone`, `utcOffsetMinutes`, `clientTime` |
+| Herkunft & Netz (Client) | `referrer`, `entryUrl`, `connectionType`, `connectionDownlink`, `deviceMemoryGb`, `hardwareConcurrency` |
+| Verhaltens-Aggregate | `totalDurationMs`, `interactionCount` |
+
+- `ipAddress` wird aus `X-Forwarded-For` / `X-Real-IP` (nginx) gelesen und **roh** gespeichert (keine Anonymisierung, Entscheid 2026-09-02).
+- Alle Kontextfelder sind optional; fehlende/fehlerhafte Telemetrie darf das Speichern der Antworten nie verhindern.
+
+### FieldStat (Aggregat pro Feld, implementiert 2026-09-02)
+
+Eine Zeile pro `(submissionId, fieldId)`. Ableitung aus dem Event-Stream.
+
+| Field | Type | Notes |
+|---|---|---|
+| submissionId | UUID | FK, cascade delete |
+| fieldId / fieldName | string | |
+| interactionType | string | text / select / slider / checkbox |
+| stepIndex | int? | Formularschritt |
+| firstViewedAt | datetime? | erstes `view`-Event |
+| answeredAt | datetime? | letzte Werteänderung |
+| timeToAnswerMs | int | answeredAt − firstViewedAt |
+| focusMs | int | Summe aller Focus→Blur-Spannen (Tipp-/Verweildauer) |
+| changeCount | int | Anzahl Werteänderungen |
+| focusCount | int | Anzahl Focus-Ereignisse |
+| finalValue | string? | Endwert |
+
 ### FieldInteraction
 
-Represents a user event tied to one field or button during a form session.
+Roher Event-Stream: eine Zeile pro Ereignis während des Formulardurchlaufs
+(implementiert 2026-09-02).
 
 | Field | Type | Constraints | Notes |
 |---|---|---|---|
 | id | UUID | required | primary key |
-| submissionId | UUID | optional | links to draft/submission |
-| sessionId | UUID | required | session correlation |
-| correlationId | UUID | required | overall flow trace |
-| fieldId | string | required | e.g. field_3_role |
-| fieldLabel | string | required | display label |
-| fieldType | string | required | select, text, checkbox, button |
-| interactionType | string | required | focus, select, click, next, submit |
-| startedAt | datetime | required | event start |
-| endedAt | datetime | required | event end |
-| durationMs | integer | required | endedAt - startedAt |
-| value | string | optional | only non-sensitive values |
+| submissionId | UUID | required | FK, cascade delete |
+| sequence | int | required | Reihenfolge im Stream |
+| stepIndex | int | optional | Formularschritt |
+| fieldId | string | required | Feld-ID bzw. `__step__` / `__submit__` |
+| fieldName | string | required | Label |
+| eventType | string | required | view / focus / blur / change / select / next / submit |
+| interactionType | string | required | text / select / slider / checkbox / navigation |
+| startedAt | datetime | optional | Zeitpunkt des Events |
+| endedAt | datetime | optional | = startedAt (Punktereignis) |
+| durationMs | integer | required | 0 für Punktereignisse |
+| value | string | optional | gewählter/eingegebener Wert |
 
 ### Session
 
@@ -58,14 +93,18 @@ Represents an active browser workflow and allows persistence/resume behavior.
 
 | Field | Type | Constraints | Notes |
 |---|---|---|---|
-| sessionId | UUID | required | primary key |
+| sessionId | UUID | required | unique |
+| correlationId | UUID | optional | Flow-Trace |
 | createdAt | datetime | required | session start |
 | lastActivityAt | datetime | required | activity heartbeat |
-| expiresAt | datetime | required | inactivity timeout |
-| userAgent | string | optional | device diagnostics |
-| platform | string | optional | mobile / desktop |
-| screenSize | string | optional | viewport metadata |
-| draftStatus | enum | required | active, expired, resumed |
+| ipAddress | string | optional | roh |
+| userAgent | string | optional | |
+| browserName / osName / platform | string | optional | aus UA |
+| screenSize / viewportSize | string | optional | `WxH` |
+| timezone / languages | string | optional | |
+| referrer / entryUrl | string | optional | |
+| interactionCount | int | required | Events im letzten Durchlauf |
+| submittedCount | int | required | Anzahl erfolgreicher Abgaben |
 
 ## Relationships
 

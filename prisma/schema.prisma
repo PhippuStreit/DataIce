@@ -8,12 +8,14 @@ datasource db {
 }
 
 model Submission {
-  id                String              @id @default(uuid())
+  id                String             @id @default(uuid())
   sessionId         String
   correlationId     String
-  createdAt         DateTime            @default(now())
-  submittedAt       DateTime?           @default(now())
+  createdAt         DateTime           @default(now())
+  submittedAt       DateTime?          @default(now())
   completedAt       DateTime?
+
+  // Formularantworten
   firstName         String
   company           String
   role              String
@@ -26,32 +28,121 @@ model Submission {
   passwordManager   String
   privacyReading    Boolean
   phoneNumber       String
-  iceName           String?             // Nicht mehr abgefragt (2026-09-02), Spalte für Altdaten behalten
-  newsletter        Boolean             @default(false)
-  termsAccepted     Boolean             @default(false)
+  iceName           String?            // Nicht mehr abgefragt (2026-09-02), Spalte für Altdaten behalten
+  newsletter        Boolean            @default(false)
+  termsAccepted     Boolean            @default(false)
+
+  // Netz / Server-seitig erfasst
+  ipAddress         String?
+  forwardedFor      String?
+  userAgent         String?
+  acceptLanguage    String?
+
+  // Aus User-Agent geparst
+  browserName       String?
+  browserVersion    String?
+  engineName        String?
+  osName            String?
+  osVersion         String?
+  deviceType        String?
+  deviceVendor      String?
+  deviceModel       String?
+  isBot             Boolean            @default(false)
+
+  // Client-seitig gemeldet (Gerät & Anzeige)
+  screenWidth       Int?
+  screenHeight      Int?
+  viewportWidth     Int?
+  viewportHeight    Int?
+  pixelRatio        Float?
+  colorDepth        Int?
+  touchCapable      Boolean?
+  maxTouchPoints    Int?
+  orientation       String?
+
+  // Sprache & Zeit
+  clientLanguages   String?
+  timezone          String?
+  utcOffsetMinutes  Int?
+  clientTime        DateTime?
+
+  // Herkunft & Netz (Client)
+  referrer          String?
+  entryUrl          String?
+  connectionType    String?
+  connectionDownlink Float?
+  deviceMemoryGb    Float?
+  hardwareConcurrency Int?
+
+  // Verhaltens-Aggregate
+  totalDurationMs   Int?
+  interactionCount  Int                @default(0)
+
   fieldInteractions FieldInteraction[]
+  fieldStats        FieldStat[]
+
+  @@index([createdAt])
+  @@index([sessionId])
 }
 
+// Roher Event-Stream: eine Zeile pro Ereignis
 model FieldInteraction {
   id              String     @id @default(uuid())
   submissionId    String
+  sequence        Int        @default(0)
+  stepIndex       Int?
   fieldId         String
   fieldName       String
-  interactionType String
+  eventType       String     // view | focus | blur | change | select | next | submit
+  interactionType String     // text | select | slider | checkbox
   startedAt       DateTime?
   endedAt         DateTime?
   durationMs      Int        @default(0)
   value           String?
   submission      Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@index([fieldId])
+}
+
+// Aggregat: eine Zeile pro (Submission, Feld)
+model FieldStat {
+  id              String     @id @default(uuid())
+  submissionId    String
+  fieldId         String
+  fieldName       String
+  interactionType String
+  stepIndex       Int?
+  firstViewedAt   DateTime?
+  answeredAt      DateTime?
+  timeToAnswerMs  Int        @default(0)
+  focusMs         Int        @default(0)
+  changeCount     Int        @default(0)
+  focusCount      Int        @default(0)
+  finalValue      String?
+  submission      Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, fieldId])
+  @@index([fieldId])
 }
 
 model Session {
-  id            String   @id @default(uuid())
-  sessionId     String   @unique
-  createdAt     DateTime @default(now())
-  lastActivityAt DateTime @default(now())
-  userAgent     String?
-  platform      String?
-  screenSize    String?
-  interactionCount Int    @default(0)
+  id                String   @id @default(uuid())
+  sessionId         String   @unique
+  correlationId     String?
+  createdAt         DateTime @default(now())
+  lastActivityAt    DateTime @default(now())
+  ipAddress         String?
+  userAgent         String?
+  browserName       String?
+  osName            String?
+  platform          String?
+  screenSize        String?
+  viewportSize      String?
+  timezone          String?
+  languages         String?
+  referrer          String?
+  entryUrl          String?
+  interactionCount  Int      @default(0)
+  submittedCount    Int      @default(0)
 }

@@ -1,7 +1,17 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { formFields, type FormField } from '@/lib/form-definition';
+import { collectClientContext, createFieldTracker, type FieldTracker } from '@/lib/telemetry';
+
+const newId = (): string => {
+  try {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
+  } catch {
+    // ignore
+  }
+  return `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
 
 const initialData: Record<string, string | boolean> = {
   firstName: '',
@@ -50,9 +60,29 @@ export default function GlaceForm() {
     [],
   );
 
+  const idsRef = useRef<{ sessionId: string; correlationId: string }>();
+  if (!idsRef.current) {
+    idsRef.current = { sessionId: newId(), correlationId: newId() };
+  }
+  const contextRef = useRef<ReturnType<typeof collectClientContext>>({});
+  const trackerRef = useRef<FieldTracker>();
+  if (!trackerRef.current) {
+    trackerRef.current = createFieldTracker(steps);
+  }
+
+  useEffect(() => {
+    contextRef.current = collectClientContext();
+  }, []);
+
   const visibleFields = steps[currentStep];
 
+  // Feld-Ansicht tracken, sobald ein Schritt sichtbar wird.
+  useEffect(() => {
+    trackerRef.current?.view(steps[currentStep]);
+  }, [currentStep, steps]);
+
   const updateField = (key: string, value: string | boolean) => {
+    trackerRef.current?.change(key, value);
     setData((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -68,6 +98,7 @@ export default function GlaceForm() {
   );
 
   const goNext = () => {
+    trackerRef.current?.step(currentStep);
     setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
   };
 
@@ -79,15 +110,23 @@ export default function GlaceForm() {
     setIsSubmitting(true);
     setSubmitError(null);
 
+    trackerRef.current?.submit();
+    const telemetry = trackerRef.current?.build(data);
+
     const payload = {
-      sessionId: 'mobile-session',
-      correlationId: 'corr-mobile',
+      sessionId: idsRef.current!.sessionId,
+      correlationId: idsRef.current!.correlationId,
       data: {
         ...data,
         operatingSystem: detectOperatingSystem(),
         newsletter: Boolean(data.newsletter),
         termsAccepted: Boolean(data.termsAccepted),
       },
+      context: contextRef.current,
+      totalDurationMs: telemetry?.totalDurationMs,
+      interactionCount: telemetry?.interactionCount,
+      events: telemetry?.events,
+      fieldStats: telemetry?.stats,
     };
 
     try {
@@ -204,6 +243,8 @@ export default function GlaceForm() {
                       onPointerDown={() => {
                         if (!hasValue) updateField(field.id, String(current));
                       }}
+                      onFocus={() => trackerRef.current?.focus(field.id)}
+                      onBlur={() => trackerRef.current?.blur(field.id)}
                       className="h-2 w-full accent-orange-500"
                     />
                     <span className="w-20 shrink-0 text-right text-lg font-semibold text-slate-900">
@@ -240,6 +281,8 @@ export default function GlaceForm() {
                   <input
                     value={String(value)}
                     onChange={(event) => updateField(field.id, event.target.value)}
+                    onFocus={() => trackerRef.current?.focus(field.id)}
+                    onBlur={() => trackerRef.current?.blur(field.id)}
                     placeholder={field.placeholder}
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base outline-none ring-0 placeholder:text-slate-400 focus:border-orange-400"
                   />

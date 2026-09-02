@@ -27,6 +27,16 @@
 - `iceName` ("Name deiner Glace"): Frage entfernt. DB-Spalte bleibt nullable für Altdaten erhalten.
 - `privacyReading` ("Datenschutzerklärung gelesen?"): "Ja" **und** "Nein" erlauben den Abschluss. Die Antwort wird als Boolean gespeichert, blockiert aber die Formularabgabe nicht mehr.
 
+### Session 2026-09-02 – Besucher-Telemetrie umgesetzt
+
+Die in TRK-001…007 beschriebene Datenerfassung ist jetzt implementiert (vorher nur DB-Struktur):
+
+- Jede `Submission` speichert den technischen Kontext des Erfassers: **IP-Adresse (roh, aus X-Forwarded-For/X-Real-IP)**, voller User-Agent, geparster Browser/Engine/OS/Gerätetyp, Bildschirm- und Viewport-Grösse, Pixeldichte, Touch-Fähigkeit, Ausrichtung, Sprache(n), Zeitzone/UTC-Offset, lokale Client-Zeit, Referrer, Einstiegs-URL, Verbindungstyp, Gerätespeicher, CPU-Kerne.
+- Pro Feld wird die **Zeit bis zur Antwort** und die **Fokus-/Tippdauer** gemessen (`FieldStat`), plus roher Event-Stream (`FieldInteraction`: view/focus/blur/change/select/next/submit mit Zeitstempel und Sequenz).
+- `sessionId`/`correlationId` sind jetzt echte UUIDs pro Durchlauf (vorher fest verdrahtet); `Session` wird mit Kontext befüllt.
+- Entscheid: **keine Anonymisierung** der IP, **kein Consent-Gate** – Offenlegung/Aufbewahrung liegt bei Nexplore (siehe FR-016).
+- Telemetrie ist "best effort": fehlerhafte oder fehlende Tracking-Daten dürfen das Speichern der Antworten nie verhindern.
+
 **Input**: User description: "Umsetzung des bereits definierten Glace-Formulars aus der Bauanleitung als feste digitale Lösung. Das Formular selbst ist fertig definiert und wird nicht vom Nutzer erstellt, sondern direkt als feste Programmierung gemäß Bauanleitung umgesetzt. Es soll für mobile Nutzung optimiert sein, eine einfache Datenbank hinter sich haben und intern leicht wartbar bleiben, ohne dass ein komplexer dynamischer Builder gebaut wird. Das UI soll sehr einfach zum Ausfüllen sein: möglichst nur Clicks, Buttons und Auswahlen – keine Texteingabe. Alle Interaktionen werden getracked: Feldaufruf, Zeit pro Feld (bis Weiterdrücken), Interaktionstyp, Zeitstempel."
 
 ## Formulardefinition gemäß Bauanleitung (Source of Truth)
