@@ -27,21 +27,19 @@ dump field_stats        'SELECT * FROM "FieldStat" ORDER BY "submissionId","step
 dump field_interactions 'SELECT * FROM "FieldInteraction" ORDER BY "submissionId","sequence"'
 dump sessions           'SELECT * FROM "Session" ORDER BY "createdAt"'
 
-# Eine breite Zeile pro Submission inkl. Feld-Zeiten (pivotiert)
+# Eine breite Zeile pro Submission inkl. Feld-Zeiten als JSON
 dump submissions_wide '
   SELECT s.*,
          fs_stats.stats AS field_timings_json
   FROM "Submission" s
   LEFT JOIN (
-    SELECT "submissionId",
-           json_object_agg("fieldId",
-             json_build_object(
-               ''timeToAnswerMs'', "timeToAnswerMs",
-               ''focusMs'', "focusMs",
-               ''changeCount'', "changeCount",
-               ''finalValue'', "finalValue"
-             )) AS stats
-    FROM "FieldStat" GROUP BY "submissionId"
+    SELECT fs."submissionId",
+           jsonb_object_agg(
+             fs."fieldId",
+             to_jsonb(fs) - $$id$$ - $$submissionId$$ - $$fieldId$$
+           ) AS stats
+    FROM "FieldStat" fs
+    GROUP BY fs."submissionId"
   ) fs_stats ON fs_stats."submissionId" = s.id
   ORDER BY s."createdAt"'
 
