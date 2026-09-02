@@ -60,8 +60,6 @@ export default function GlaceForm() {
     if (!field.required) return true;
     const value = data[field.id];
     if (field.type === 'checkbox') return value === true;
-    // privacyReading zählt nur als ausgefüllt, wenn "Ja" gewählt wurde
-    if (field.id === 'privacyReading') return value === 'Ja';
     return typeof value === 'string' && value.trim().length > 0;
   };
 

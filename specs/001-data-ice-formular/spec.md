@@ -13,7 +13,7 @@
 
 ### Session 2026-09-02
 - Anpassung: Titel des Formulars lautet "Deine Gratis-Glace" (vorher "Dein …").
-- Anpassung: Pflichtfelder werden mit "*" gekennzeichnet; der "Weiter"-Button ist erst aktiv, wenn alle Pflichtfelder des aktuellen Schritts ausgefüllt sind (Schritt-Gate zusätzlich zur Meldungslogik aus FR-006). Bei `privacyReading` zählt nur "Ja" als ausgefüllt.
+- Anpassung: Pflichtfelder werden mit "*" gekennzeichnet; der "Weiter"-Button ist erst aktiv, wenn alle Pflichtfelder des aktuellen Schritts ausgefüllt sind (Schritt-Gate zusätzlich zur Meldungslogik aus FR-006).
 - Anpassung: Nach erfolgreichem Absenden erscheint ein Abschluss-Screen ("Merci viumau", Nexplore-Logo, Link zu www.nexplore.ch) statt eines Auto-Resets zurück auf Schritt 1.
 - Anpassung: Die Anwendung tritt unter Nexplore-Branding auf (Logo im Header, Seitentitel).
 
@@ -25,6 +25,7 @@
 - `appCount`: Label "Wie viele Apps nutzt du?" → "Wie viele Apps auf deinem Handy nutzt du?".
 - `passwordManager`: Label "Passwortmanager?" → "Nutzt du einen Passwortmanager?".
 - `iceName` ("Name deiner Glace"): Frage entfernt. DB-Spalte bleibt nullable für Altdaten erhalten.
+- `privacyReading` ("Datenschutzerklärung gelesen?"): "Ja" **und** "Nein" erlauben den Abschluss. Die Antwort wird als Boolean gespeichert, blockiert aber die Formularabgabe nicht mehr.
 
 **Input**: User description: "Umsetzung des bereits definierten Glace-Formulars aus der Bauanleitung als feste digitale Lösung. Das Formular selbst ist fertig definiert und wird nicht vom Nutzer erstellt, sondern direkt als feste Programmierung gemäß Bauanleitung umgesetzt. Es soll für mobile Nutzung optimiert sein, eine einfache Datenbank hinter sich haben und intern leicht wartbar bleiben, ohne dass ein komplexer dynamischer Builder gebaut wird. Das UI soll sehr einfach zum Ausfüllen sein: möglichst nur Clicks, Buttons und Auswahlen – keine Texteingabe. Alle Interaktionen werden getracked: Feldaufruf, Zeit pro Feld (bis Weiterdrücken), Interaktionstyp, Zeitstempel."
 
@@ -297,7 +298,7 @@ Das Entwicklungsteam muss das Glace-Formular in einer klaren und wartbaren Weise
 - **UX-003**: Wo Text notwendig ist (z. B. Vorname, Postleitzahl), SOLLEN Eingabemasken mit kleinem Zeichenumfang und Platzhaltern eingesetzt werden, um die Eingabedauer zu minimieren.
 - **UX-004**: Die Bedienelemente MÜSSEN gut erreichbar und sichtbar sein; Buttons SOLLEN mindestens 48px im Quadrat sein.
 - **UX-005**: Das Formular SOLL auf Smartphones schnell, ohne Rucken, und mit minimaler kognitiver Last bedienbar sein.
-- **UX-006**: Pflichtfelder MÜSSEN im Label mit "*" gekennzeichnet sein. Der "Weiter"-Button (bzw. "Absenden" im letzten Schritt) MUSS deaktiviert bleiben, bis alle Pflichtfelder des aktuellen Schritts ausgefüllt sind. Für `privacyReading` gilt nur die Auswahl "Ja" als ausgefüllt.
+- **UX-006**: Pflichtfelder MÜSSEN im Label mit "*" gekennzeichnet sein. Der "Weiter"-Button (bzw. "Absenden" im letzten Schritt) MUSS deaktiviert bleiben, bis alle Pflichtfelder des aktuellen Schritts ausgefüllt sind. Jede getroffene Auswahl gilt als ausgefüllt – auch "Nein" bei `privacyReading`.
 - **UX-007**: Nach erfolgreichem Absenden MUSS ein Abschluss-Screen erscheinen: "Merci viumau", Nexplore-Logo und ein Link/Button zu `https://www.nexplore.ch`. Das Formular DARF nicht automatisch zurückgesetzt oder neu gestartet werden.
 
 ### Tracking & Telemetry Requirements

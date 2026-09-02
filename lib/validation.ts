@@ -18,9 +18,8 @@ export const formDataSchema = z.object({
   operatingSystem: z.string().min(1),
   appCount: z.string().min(1, 'Bitte wähle eine Anzahl.'),
   passwordManager: z.string().min(1, 'Bitte wähle eine Option.'),
-  privacyReading: z.string().refine((value) => value === 'Ja', {
-    message: 'Bitte akzeptiere die Datenschutzerklärung.',
-  }),
+  // Ja oder Nein sind beide gültig; blockiert den Abschluss nicht.
+  privacyReading: z.string().min(1, 'Bitte wähle Ja oder Nein.'),
   phoneNumber: z.string().min(1, 'Bitte gib deine Handynummer ein.'),
   newsletter: z.boolean().optional(),
   termsAccepted: z.boolean().refine((value) => value === true, {
