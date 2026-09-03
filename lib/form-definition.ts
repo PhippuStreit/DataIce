@@ -40,7 +40,7 @@ export const formFields: FormField[] = [
   { id: 'appCount', label: 'Wie viele Apps auf deinem Handy nutzt du?', type: 'select', required: true, options: ['1-5', '6-10', '11-20', '20+'] },
   { id: 'passwordManager', label: 'Nutzt du einen Passwortmanager?', type: 'select', required: true, options: ['Ja', 'Nein', 'Ich weiss nicht'] },
   { id: 'privacyReading', label: 'Datenschutzerklärung gelesen?', type: 'select', required: true, options: ['Ja', 'Nein'] },
-  { id: 'phoneNumber', label: 'Handynummer', type: 'text', required: true, placeholder: '+41 79 ...' },
+  { id: 'phoneNumber', label: 'Handynummer', type: 'text', hint: 'optional', placeholder: '+41 79 ...' },
   { id: 'newsletter', label: 'Newsletter abonnieren', type: 'checkbox' },
   { id: 'termsAccepted', label: 'Ich akzeptiere die Bedingungen', type: 'checkbox', required: true },
 ];
