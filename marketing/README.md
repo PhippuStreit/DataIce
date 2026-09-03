@@ -1,11 +1,19 @@
 # Marketing
 
-## flyer-glacetruhe.html
+## flyer-glacetruhe.html — A4
 
-A4-Aushang für die Glacetruhe. QR-Code zeigt auf `https://data.digidude.ch`.
+Aushang, der **auf der Glacetruhe** liegt. Wer hier scannt, ist schon am Ziel.
+
+## flyer-a5-tisch.html — A5
+
+Kärtchen für **Tische** im Raum. Sagt: Formular ausfüllen, dann zur Glacetruhe
+gehen und den generierten QR-Code vorzeigen.
+
+Beide: QR-Code zeigt auf `https://data.digidude.ch`. Fertige PDFs liegen daneben
+(`*.pdf`), erzeugt mit `./build-pdf.sh`.
 
 **Drucken:** Datei im Browser öffnen → „Als PDF drucken" (oder Cmd/Strg+P).
-Format **A4**, Skalierung **100 %**, Ränder **keine**.
+Format **A4** bzw. **A5**, Skalierung **100 %**, Ränder **keine**.
 
 QR-Code neu erzeugen (falls Domain ändert):
 

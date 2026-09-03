@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tisch-Flyer A5 &ndash; Gratis Glace</title>
+<style>
+  /* A5-Kärtchen für Tische. Lokal öffnen und drucken:
+     "Als PDF drucken" oben, oder Cmd/Strg+P. Format A5, Skalierung 100 %, Ränder keine. */
+  :root {
+    --paper: #ffffff;
+    --ink: #201b19;
+    --ink-soft: #6c635c;
+    --hair: #e6e1d8;
+    --orange: #ec6608;
+    --orange-deep: #b64f05;
+    --frost: #e8f1ee;
+    --frost-edge: #cfe4dd;
+    --backdrop: #e9e5de;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--backdrop);
+    color: var(--ink);
+    font-family: Arial, Helvetica, "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: rgba(233, 229, 222, 0.85);
+    border-bottom: 1px solid var(--hair);
+  }
+  .toolbar p { margin: 0; font-size: 13px; color: var(--ink-soft); }
+
+  .btn {
+    appearance: none; border: 0; cursor: pointer;
+    font: 700 14px/1 Arial, sans-serif; letter-spacing: 0.02em;
+    padding: 10px 18px; border-radius: 999px; background: var(--orange); color: #fff;
+  }
+  .btn:focus-visible { outline: 3px solid var(--orange-deep); outline-offset: 2px; }
+
+  .stage { display: flex; justify-content: center; padding: 28px 16px 64px; }
+
+  /* ---- The card: true A5 ---- */
+  .sheet {
+    width: 148mm;
+    height: 210mm;
+    background: var(--paper);
+    box-shadow: 0 20px 50px -18px rgba(40, 30, 20, 0.35);
+    padding: 12mm 12mm 10mm;
+    display: flex;
+    flex-direction: column;
+    gap: 6mm;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mast {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 3.5mm;
+  }
+  .wordmark {
+    font-weight: 900;
+    font-size: 23px;
+    letter-spacing: -0.03em;
+    color: var(--orange);
+  }
+  .mast .where {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .hero { display: flex; align-items: center; gap: 5mm; }
+  .hero-copy { display: flex; flex-direction: column; gap: 2.5mm; flex: 1; }
+
+  .kicker {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--orange-deep);
+  }
+  .headline {
+    margin: 0;
+    font-family: "Arial Black", "Arial Bold", Arial, sans-serif;
+    font-weight: 900;
+    font-size: 49px;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+  .headline .gratis { color: var(--orange); }
+
+  .cream { width: 34mm; height: auto; flex: none; }
+
+  .deal {
+    align-self: flex-start;
+    background: var(--orange);
+    color: #fff;
+    font-size: 14.5px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    padding: 3.5mm 4.5mm;
+  }
+
+  .steps { display: flex; flex-direction: column; gap: 3mm; }
+  .step { display: grid; grid-template-columns: 8mm 1fr; gap: 3mm; align-items: start; }
+  .step .n {
+    font-family: "Arial Black", Arial, sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--orange);
+  }
+  .step .t { font-size: 12.5px; font-weight: 700; line-height: 1.32; color: var(--ink); }
+  .step .t span { color: var(--ink-soft); font-weight: 400; }
+  .step .t b { color: var(--orange-deep); }
+
+  .scan {
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: 40mm 1fr;
+    gap: 6mm;
+    align-items: center;
+    background: var(--frost);
+    border: 1px solid var(--frost-edge);
+    padding: 6mm;
+  }
+  .qr {
+    width: 40mm; height: 40mm;
+    background: #fff;
+    border: 1px solid var(--frost-edge);
+    padding: 3mm;
+  }
+  .qr svg { display: block; width: 100%; height: 100%; }
+  .scan .big {
+    margin: 0;
+    font-family: "Arial Black", Arial, sans-serif;
+    font-weight: 900;
+    font-size: 27px;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .scan .big em { font-style: normal; color: var(--orange); }
+  .scan .meta {
+    margin: 2mm 0 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    line-height: 1.35;
+  }
+
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 5mm;
+    border-top: 1px solid var(--hair);
+    padding-top: 2.5mm;
+    font-size: 9px;
+    line-height: 1.35;
+    color: var(--ink-soft);
+  }
+  .foot .site { font-weight: 700; color: var(--orange-deep); white-space: nowrap; }
+
+  @media print {
+    @page { size: A5; margin: 0; }
+    body { background: #fff; }
+    .toolbar { display: none; }
+    .stage { padding: 0; }
+    .sheet { box-shadow: none; }
+  }
+
+  @media (max-width: 620px) {
+    .sheet { transform: scale(0.8); transform-origin: top center; margin-bottom: -42mm; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button class="btn" onclick="window.print()">Als PDF drucken</button>
+  <p>A5 &middot; 100 % &middot; ohne R&auml;nder</p>
+</div>
+
+<div class="stage">
+  <article class="sheet">
+    <header class="mast">
+      <span class="wordmark">nexplore</span>
+      <span class="where">Glace-Aktion</span>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="kicker">Zieh dir deine Glace</p>
+        <h1 class="headline"><span class="gratis">Gratis</span><br>Glace</h1>
+      </div>
+      <svg class="cream" viewBox="0 0 200 262" role="img" aria-label="Illustration eines Glaces im Waffelh&ouml;rnchen">
+        <defs><clipPath id="cone"><polygon points="58,150 142,150 100,256" /></clipPath></defs>
+        <polygon points="58,150 142,150 100,256" fill="#d8a145" />
+        <g clip-path="url(#cone)" stroke="#b47f2c" stroke-width="2.6" opacity="0.85">
+          <line x1="30" y1="150" x2="150" y2="290" />
+          <line x1="70" y1="150" x2="190" y2="290" />
+          <line x1="110" y1="150" x2="230" y2="290" />
+          <line x1="150" y1="150" x2="40" y2="300" />
+          <line x1="185" y1="150" x2="75" y2="300" />
+          <line x1="10" y1="196" x2="210" y2="196" />
+          <line x1="24" y1="228" x2="196" y2="228" />
+        </g>
+        <circle cx="100" cy="150" r="45" fill="#f7ead9" />
+        <circle cx="71" cy="111" r="39" fill="#e0567f" />
+        <circle cx="129" cy="111" r="39" fill="#ec6608" />
+        <circle cx="100" cy="80" r="41" fill="#f7ead9" />
+        <circle cx="87" cy="67" r="11" fill="#ffffff" opacity="0.55" />
+        <circle cx="58" cy="101" r="8" fill="#ffffff" opacity="0.4" />
+        <circle cx="120" cy="101" r="8" fill="#ffffff" opacity="0.4" />
+        <circle cx="100" cy="41" r="12" fill="#c53b30" />
+        <path d="M100 30 C104 18 115 14 123 16" fill="none" stroke="#5c7a3a" stroke-width="3.6" stroke-linecap="round" />
+      </svg>
+    </section>
+
+    <p class="deal">Formular ausf&uuml;llen, an der <u>Glacetruhe</u> deine Glace abholen.</p>
+
+    <section class="steps" aria-label="So geht&rsquo;s">
+      <div class="step">
+        <span class="n">1</span>
+        <span class="t">QR scannen und das kurze Formular ausf&uuml;llen. <span>Dauert etwa 20 Sekunden.</span></span>
+      </div>
+      <div class="step">
+        <span class="n">2</span>
+        <span class="t">Nach dem Absenden erscheint ein <b>QR-Code auf dem Handy</b>. <span>Das ist dein Gutschein.</span></span>
+      </div>
+      <div class="step">
+        <span class="n">3</span>
+        <span class="t">Damit zur <b>Glacetruhe</b> &ndash; Code vorzeigen, Sorte aussuchen, geniessen. <span>Merci viumau!</span></span>
+      </div>
+    </section>
+
+    <section class="scan">
+      <div class="qr">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" shape-rendering="crispEdges" role="img" aria-label="QR-Code zum Formular"><path fill="#ffffff" d="M0 0h25v25H0z"/><path stroke="#201b19" d="M0 0.5h7m2 0h2m1 0h1m3 0h1m1 0h7M0 1.5h1m5 0h1m3 0h1m3 0h3m1 0h1m5 0h1M0 2.5h1m1 0h3m1 0h1m1 0h1m3 0h1m2 0h1m2 0h1m1 0h3m1 0h1M0 3.5h1m1 0h3m1 0h1m1 0h1m2 0h4m3 0h1m1 0h3m1 0h1M0 4.5h1m1 0h3m1 0h1m1 0h2m2 0h1m1 0h1m1 0h1m1 0h1m1 0h3m1 0h1M0 5.5h1m5 0h1m1 0h1m2 0h1m2 0h3m1 0h1m5 0h1M0 6.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7.5h1m1 0h2m2 0h1m1 0h1M0 8.5h1m1 0h5m3 0h1m2 0h3m2 0h5M0 9.5h3m2 0h1m1 0h4m1 0h1m3 0h1m2 0h1m3 0h1M0 10.5h4m2 0h2m3 0h1m2 0h3m1 0h1m2 0h1m1 0h2M3 11.5h1m4 0h2m2 0h1m2 0h1m1 0h3m4 0h1M5 12.5h4m4 0h2m2 0h2m1 0h1m1 0h3M0 13.5h1m1 0h4m1 0h2m3 0h1m3 0h2m1 0h1m1 0h1m1 0h1M0 14.5h1m1 0h2m2 0h1m2 0h1m4 0h2m1 0h5m1 0h2M0 15.5h1m3 0h1m4 0h1m2 0h1m1 0h3m1 0h3m3 0h1M0 16.5h1m1 0h1m1 0h1m1 0h1m1 0h2m2 0h2m1 0h6m1 0h1M8 17.5h1m4 0h1m1 0h2m3 0h2M0 18.5h7m2 0h6m1 0h1m1 0h1m1 0h1m1 0h3M0 19.5h1m5 0h1m1 0h1m2 0h1m4 0h1m3 0h2m2 0h1M0 20.5h1m1 0h3m1 0h1m1 0h1m2 0h10m1 0h1M0 21.5h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m2 0h4m1 0h5M0 22.5h1m1 0h3m1 0h1m1 0h1m3 0h2m2 0h1m4 0h2m1 0h1M0 23.5h1m5 0h1m5 0h1m1 0h3m1 0h4m2 0h1M0 24.5h7m1 0h8m1 0h8"/></svg>
+      </div>
+      <div>
+        <p class="big">Jetzt <em>scannen</em></p>
+        <p class="meta">Keine App, keine Anmeldung.</p>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <span>Mit dem Ausf&uuml;llen akzeptierst du die Glace-Nutzungsbedingungen (im Formular). Ein Glace pro Person.</span>
+      <span class="site">nexplore.ch</span>
+    </footer>
+  </article>
+</div>
+
+</body>
+</html>
