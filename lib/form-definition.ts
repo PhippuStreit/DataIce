@@ -11,11 +11,16 @@ export type FormField = {
   min?: number;
   max?: number;
   unit?: string;
+  // Mobile-Tastatur / Autofill für Textfelder
+  inputType?: 'text' | 'tel' | 'email';
+  inputMode?: 'text' | 'tel' | 'numeric' | 'decimal' | 'email' | 'url' | 'search';
+  autoComplete?: string;
+  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
 };
 
 export const formFields: FormField[] = [
-  { id: 'firstName', label: 'Wer bist du?', type: 'text', required: true, placeholder: 'Vorname' },
-  { id: 'company', label: 'Für welche Firma?', type: 'text', required: true, placeholder: 'Firma' },
+  { id: 'firstName', label: 'Wer bist du?', type: 'text', required: true, placeholder: 'Vorname', autoComplete: 'given-name', autoCapitalize: 'words' },
+  { id: 'company', label: 'Für welche Firma?', type: 'text', required: true, placeholder: 'Firma', autoComplete: 'organization', autoCapitalize: 'words' },
   {
     id: 'role',
     label: 'Welche Rolle hast du?',
@@ -34,13 +39,13 @@ export const formFields: FormField[] = [
     ],
   },
   { id: 'yearsExperience', label: 'Wie viele Jahre Erfahrung?', type: 'slider', required: true, min: 1, max: 60, unit: 'Jahre' },
-  { id: 'postalCode', label: 'Postleitzahl', type: 'text', required: true, placeholder: 'PLZ' },
+  { id: 'postalCode', label: 'Postleitzahl', type: 'text', required: true, placeholder: 'PLZ', inputMode: 'numeric', autoComplete: 'postal-code' },
   { id: 'favoriteFlavor', label: 'Deine Lieblings-Glace?', type: 'select', required: true, multiple: true, hint: 'Mehrfachauswahl möglich', options: ['Spargelglace', 'Vegan', 'Rahmglace', 'Sorbet'] },
   { id: 'visitReason', label: 'Warum bist du hier?', type: 'select', required: true, options: ['Networking', 'Digitale Transformation', 'KI', 'Horizonterweiterung'] },
   { id: 'appCount', label: 'Wie viele Apps auf deinem Handy nutzt du?', type: 'select', required: true, options: ['1-5', '6-10', '11-20', '20+'] },
   { id: 'passwordManager', label: 'Nutzt du einen Passwortmanager?', type: 'select', required: true, options: ['Ja', 'Nein', 'Ich weiss nicht'] },
   { id: 'privacyReading', label: 'Datenschutzerklärung gelesen?', type: 'select', required: true, options: ['Ja', 'Nein'] },
-  { id: 'phoneNumber', label: 'Handynummer', type: 'text', placeholder: '+41 79 ...' },
+  { id: 'phoneNumber', label: 'Handynummer', type: 'text', placeholder: '+41 79 ...', inputType: 'tel', inputMode: 'tel', autoComplete: 'tel' },
   { id: 'newsletter', label: 'Newsletter abonnieren', type: 'checkbox' },
   { id: 'termsAccepted', label: 'Ich akzeptiere die Bedingungen', type: 'checkbox', required: true },
 ];

@@ -207,6 +207,17 @@ export default function GlaceForm() {
 
   const isLastStep = currentStep === steps.length - 1;
 
+  // Enter im Textfeld = Weiter (bzw. Absenden im letzten Schritt).
+  const onFormSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!isStepValid) return;
+    if (isLastStep) {
+      if (!isSubmitting) handleSubmit();
+    } else {
+      goNext();
+    }
+  };
+
   // QR-Code für die Abhol-Bestätigung erzeugen, sobald das Formular abgeschickt ist.
   useEffect(() => {
     if (!isSubmitted) return;
@@ -278,7 +289,8 @@ export default function GlaceForm() {
           ))}
         </div>
 
-        <div className="space-y-4">
+        <form onSubmit={onFormSubmit}>
+          <div className="space-y-4">
           {visibleFields.map((fieldId) => {
             const field = formFields.find((item) => item.id === fieldId)!;
             const value = data[fieldId] ?? '';
@@ -394,54 +406,49 @@ export default function GlaceForm() {
                   </div>
                 ) : (
                   <input
+                    name={field.id}
+                    type={field.inputType ?? 'text'}
                     value={String(value)}
                     onChange={(event) => updateField(field.id, event.target.value)}
                     onFocus={() => trackerRef.current?.focus(field.id)}
                     onBlur={() => trackerRef.current?.blur(field.id)}
                     placeholder={field.placeholder}
+                    inputMode={field.inputMode}
+                    autoComplete={field.autoComplete}
+                    autoCapitalize={field.autoCapitalize}
+                    enterKeyHint={isLastStep ? 'send' : 'next'}
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base outline-none ring-0 placeholder:text-slate-400 focus:border-orange-400"
                   />
                 )}
               </div>
             );
           })}
-        </div>
+          </div>
 
-        <div className="mt-6 flex gap-3">
-          <button
-            type="button"
-            onClick={goBack}
-            disabled={currentStep === 0}
-            className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-medium text-slate-700 disabled:opacity-40"
-          >
-            Zurück
-          </button>
-          {isLastStep ? (
+          <div className="mt-6 flex gap-3">
             <button
               type="button"
-              onClick={handleSubmit}
+              onClick={goBack}
+              disabled={currentStep === 0}
+              className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-medium text-slate-700 disabled:opacity-40"
+            >
+              Zurück
+            </button>
+            <button
+              type="submit"
               disabled={isSubmitting || !isStepValid}
               className="flex-1 rounded-2xl bg-orange-500 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {isSubmitting ? 'Wird gespeichert...' : 'Absenden'}
+              {isLastStep ? (isSubmitting ? 'Wird gespeichert...' : 'Absenden') : 'Weiter'}
             </button>
-          ) : (
-            <button
-              type="button"
-              onClick={goNext}
-              disabled={!isStepValid}
-              className="flex-1 rounded-2xl bg-orange-500 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Weiter
-            </button>
-          )}
-        </div>
-
-        {submitError && (
-          <div className="mt-4 rounded-2xl bg-red-100 p-4 text-red-800">
-            {submitError}
           </div>
-        )}
+
+          {submitError && (
+            <div className="mt-4 rounded-2xl bg-red-100 p-4 text-red-800">
+              {submitError}
+            </div>
+          )}
+        </form>
       </div>
 
       <TermsOverlay open={showTerms} onClose={closeTerms} />
