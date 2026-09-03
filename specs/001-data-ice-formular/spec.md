@@ -44,6 +44,11 @@ Die in TRK-001…007 beschriebene Datenerfassung ist jetzt implementiert (vorher
 - `newsletter`: Checkbox ist **vorausgewählt** (überschreibt die "false bis Double-Opt-In"-Erwartung aus FR-015 bewusst).
 - `termsAccepted`: Label verlinkt auf **Glace-Nutzungsbedingungen**, die in einem Overlay eingeblendet werden (humoristischer Inhalt, u. a. die Aufforderung, am Event jemandem ein ehrliches Kompliment zu machen). Getrackt wird, **ob** das Overlay geöffnet wurde (`termsOpened`) und die **kumulierte Verweildauer** darauf (`termsViewMs`); zusätzlich open/close als Events im Stream.
 
+### Session 2026-09-03 – Rolle + Schrittaufteilung
+
+- `role` ("Welche Rolle hast du?"): neue Optionen – Geschäftsführung / CEO · Mitglied der Geschäftsleitung · Bereichs- / Abteilungsleitung · Projekt- / Programmleitung · Fachspezialist:in / Expert:in · Lehrperson / Dozent:in / Trainer:in · Lernende:r / Studierende:r · Andere Funktion. Einfachauswahl, einspaltig dargestellt.
+- Die Schritte werden **dynamisch** aus der Feldliste gebildet (`lib/form-steps.ts`), sodass jeder Schritt auf einem Handy ohne Scrollen passt: Text-/Slider-Felder gebündelt, optionsreiche Felder ggf. allein, Checkboxen zusammen. Aktuell ergeben sich 8 Schritte. Optionslisten werden je nach Labellänge/Anzahl ein- oder zweispaltig dargestellt.
+
 **Input**: User description: "Umsetzung des bereits definierten Glace-Formulars aus der Bauanleitung als feste digitale Lösung. Das Formular selbst ist fertig definiert und wird nicht vom Nutzer erstellt, sondern direkt als feste Programmierung gemäß Bauanleitung umgesetzt. Es soll für mobile Nutzung optimiert sein, eine einfache Datenbank hinter sich haben und intern leicht wartbar bleiben, ohne dass ein komplexer dynamischer Builder gebaut wird. Das UI soll sehr einfach zum Ausfüllen sein: möglichst nur Clicks, Buttons und Auswahlen – keine Texteingabe. Alle Interaktionen werden getracked: Feldaufruf, Zeit pro Feld (bis Weiterdrücken), Interaktionstyp, Zeitstempel."
 
 ## Formulardefinition gemäß Bauanleitung (Source of Truth)

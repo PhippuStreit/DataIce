@@ -5,6 +5,7 @@ export type FormField = {
   required?: boolean;
   options?: string[];
   multiple?: boolean;
+  columns?: 1 | 2;
   hint?: string;
   placeholder?: string;
   min?: number;
@@ -15,7 +16,23 @@ export type FormField = {
 export const formFields: FormField[] = [
   { id: 'firstName', label: 'Wer bist du?', type: 'text', required: true, placeholder: 'Vorname' },
   { id: 'company', label: 'Für welche Firma?', type: 'text', required: true, placeholder: 'Firma' },
-  { id: 'role', label: 'Welche Rolle hast du?', type: 'select', required: true, options: ['Marketing', 'Vertrieb', 'Operations', 'Management'] },
+  {
+    id: 'role',
+    label: 'Welche Rolle hast du?',
+    type: 'select',
+    required: true,
+    columns: 1,
+    options: [
+      'Geschäftsführung / CEO',
+      'Mitglied der Geschäftsleitung',
+      'Bereichs- / Abteilungsleitung',
+      'Projekt- / Programmleitung',
+      'Fachspezialist:in / Expert:in',
+      'Lehrperson / Dozent:in / Trainer:in',
+      'Lernende:r / Studierende:r',
+      'Andere Funktion',
+    ],
+  },
   { id: 'yearsExperience', label: 'Wie viele Jahre Erfahrung?', type: 'slider', required: true, min: 1, max: 60, unit: 'Jahre' },
   { id: 'postalCode', label: 'Postleitzahl', type: 'text', required: true, placeholder: 'PLZ' },
   { id: 'favoriteFlavor', label: 'Deine Lieblings-Glace?', type: 'select', required: true, multiple: true, hint: 'Mehrfachauswahl möglich', options: ['Spargelglace', 'Vegan', 'Rahmglace', 'Sorbet'] },

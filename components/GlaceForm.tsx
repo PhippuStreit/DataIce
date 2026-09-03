@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { formFields, type FormField } from '@/lib/form-definition';
+import { buildSteps } from '@/lib/form-steps';
 import { collectClientContext, createFieldTracker, type FieldTracker } from '@/lib/telemetry';
 import TermsOverlay from '@/components/TermsOverlay';
 
@@ -70,15 +71,7 @@ export default function GlaceForm() {
   const termsViewMsRef = useRef(0);
   const termsOpenAtRef = useRef<number | null>(null);
 
-  const steps = useMemo(
-    () => [
-      ['firstName', 'company', 'role', 'yearsExperience'],
-      ['postalCode', 'favoriteFlavor', 'visitReason', 'appCount'],
-      ['passwordManager', 'privacyReading', 'phoneNumber'],
-      ['newsletter', 'termsAccepted'],
-    ],
-    [],
-  );
+  const steps = useMemo(() => buildSteps(), []);
 
   const idsRef = useRef<{ sessionId: string; correlationId: string }>();
   if (!idsRef.current) {
@@ -365,6 +358,11 @@ export default function GlaceForm() {
               .map((s) => s.trim())
               .filter(Boolean);
 
+            const opts = field.options ?? [];
+            const longOptionLabel = opts.some((o) => o.length > 16);
+            const optionColumns =
+              field.columns ?? (field.multiple || longOptionLabel || opts.length > 4 ? 1 : 2);
+
             return (
               <div key={field.id} className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">
@@ -373,7 +371,7 @@ export default function GlaceForm() {
                 </label>
                 {field.hint && <p className="text-xs text-slate-400">{field.hint}</p>}
                 {field.options ? (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className={`grid gap-2 ${optionColumns === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                     {field.options.map((option) => {
                       const selected = field.multiple
                         ? multiSelected.includes(option)
