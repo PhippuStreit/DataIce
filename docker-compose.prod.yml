@@ -37,6 +37,8 @@ services:
       NODE_ENV: production
       LOG_LEVEL: ${LOG_LEVEL:-info}
       SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET in .env.prod}
+      ANALYTICS_USER: ${ANALYTICS_USER:-nexplore}
+      ANALYTICS_PASSWORD: ${ANALYTICS_PASSWORD:-}
     ports:
       - "127.0.0.1:3000:3000"
     restart: always
