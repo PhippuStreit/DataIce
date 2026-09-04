@@ -35,9 +35,26 @@ const splitMulti = (values: (string | null | undefined)[]): Bucket[] => {
 
 const fieldLabel = (id: string) => formFields.find((f) => f.id === id)?.label ?? id;
 
+// Eigene Test-Durchläufe (Entwicklung/QA), nicht Teil der echten Auswertung.
+const TEST_FIRST_NAMES = ['phippu'];
+
 export async function getAnalytics() {
+  const excluded = TEST_FIRST_NAMES.length
+    ? await prisma.submission.findMany({
+        where: {
+          OR: TEST_FIRST_NAMES.map((name) => ({
+            firstName: { equals: name, mode: 'insensitive' as const },
+          })),
+        },
+        select: { id: true },
+      })
+    : [];
+  const excludedIds = excluded.map((e) => e.id);
+  const notExcluded = { id: { notIn: excludedIds } };
+
   const [rows, fieldStats, totalCount] = await Promise.all([
     prisma.submission.findMany({
+      where: notExcluded,
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -69,11 +86,12 @@ export async function getAnalytics() {
     }),
     prisma.fieldStat.groupBy({
       by: ['fieldId'],
+      where: { submissionId: { notIn: excludedIds } },
       _avg: { timeToAnswerMs: true, focusMs: true, changeCount: true },
       _max: { timeToAnswerMs: true },
       _count: { fieldId: true },
     }),
-    prisma.submission.count(),
+    prisma.submission.count({ where: notExcluded }),
   ]);
 
   const nums = <T,>(arr: T[], pick: (t: T) => number | null | undefined): number[] =>
