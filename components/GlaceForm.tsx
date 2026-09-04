@@ -304,7 +304,7 @@ export default function GlaceForm() {
                     onChange={(event) => updateField(field.id, event.target.checked)}
                     className="mt-1 h-5 w-5 accent-orange-500"
                   />
-                  <span className="text-base text-slate-700">
+                  <span className="text-lg text-slate-700">
                     {field.id === 'termsAccepted' ? (
                       <>
                         Ich akzeptiere die{' '}
@@ -335,7 +335,7 @@ export default function GlaceForm() {
               const current = hasValue ? Number(value) : min;
               return (
                 <div key={field.id} className="space-y-2">
-                  <label className="text-base font-medium text-slate-700">
+                  <label className="text-lg font-medium text-slate-700">
                     {field.label}
                     {field.required && <span className="text-orange-500"> *</span>}
                   </label>
@@ -359,7 +359,7 @@ export default function GlaceForm() {
                     </span>
                   </div>
                   {!hasValue && (
-                    <p className="text-sm text-slate-400">Regler bewegen, um zu wählen ({min}–{max}).</p>
+                    <p className="text-base text-slate-400">Regler bewegen, um zu wählen ({min}–{max}).</p>
                   )}
                 </div>
               );
@@ -377,11 +377,11 @@ export default function GlaceForm() {
 
             return (
               <div key={field.id} className="space-y-2">
-                <label className="text-base font-medium text-slate-700">
+                <label className="text-lg font-medium text-slate-700">
                   {field.label}
                   {field.required && <span className="text-orange-500"> *</span>}
                 </label>
-                {field.hint && <p className="text-sm text-slate-400">{field.hint}</p>}
+                {field.hint && <p className="text-base text-slate-400">{field.hint}</p>}
                 {field.options ? (
                   <div className={`grid gap-2 ${optionColumns === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                     {field.options.map((option) => {
@@ -417,7 +417,7 @@ export default function GlaceForm() {
                     autoComplete={field.autoComplete}
                     autoCapitalize={field.autoCapitalize}
                     enterKeyHint={isLastStep ? 'send' : 'next'}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base outline-none ring-0 placeholder:text-slate-400 focus:border-orange-400"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-lg outline-none ring-0 placeholder:text-slate-400 focus:border-orange-400"
                   />
                 )}
               </div>

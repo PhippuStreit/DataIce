@@ -10,20 +10,20 @@ const BUDGET = 380;
 const LONG_LABEL = 16;
 
 export function estimateFieldHeight(field: FormField): number {
-  if (field.type === 'checkbox') return 60;
+  if (field.type === 'checkbox') return 64;
 
-  let height = 46; // Label
-  if (field.hint) height += 16;
+  let height = 50; // Label (text-lg)
+  if (field.hint) height += 18;
 
-  if (field.type === 'text') return height + 50;
-  if (field.type === 'slider') return height + 76;
+  if (field.type === 'text') return height + 54;
+  if (field.type === 'slider') return height + 80;
 
   // select / radio (Buttons)
   const options = field.options ?? [];
   const longLabel = options.some((o) => o.length > LONG_LABEL);
   const columns = field.columns ?? (field.multiple || longLabel || options.length > 4 ? 1 : 2);
   const rows = Math.ceil(options.length / columns);
-  const rowHeight = longLabel ? 54 : 48;
+  const rowHeight = longLabel ? 60 : 52;
   return height + rows * (rowHeight + 8);
 }
 

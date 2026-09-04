@@ -33,7 +33,7 @@ input {
 
 @layer components {
   .touch-button {
-    @apply min-h-[48px] rounded-2xl border border-orange-200 bg-white px-4 py-3 text-left text-base font-medium text-slate-700 shadow-sm transition active:scale-[0.98];
+    @apply min-h-[52px] rounded-2xl border border-orange-200 bg-white px-4 py-3 text-left text-lg font-medium text-slate-700 shadow-sm transition active:scale-[0.98];
   }
 
   .touch-button-selected {
