@@ -16,6 +16,9 @@ enthält bewusst nur diese eine Feature-Spec, keine dauerhafte Session-Historie 
 Anpassungen werden direkt in Requirements/Ist-Stand nachgeführt und unten im Änderungsverlauf
 vermerkt.
 
+Weitere Dokumente zu diesem Feature: [plan.md](plan.md) (Architekturentscheidungen),
+[tasks.md](tasks.md) (Umsetzungsschritte, retroactiv dokumentiert).
+
 ## Clarifications
 
 ### Session 2026-09-03
