@@ -4,12 +4,17 @@
 
 **Created**: 2026-09-03
 
+**Last Updated**: 2026-09-04
+
 **Status**: Umgesetzt
 
 **Input**: User description: "Eine intelligente Seite bauen, wo die Daten ausgewertet werden können. Firma und Vorname darin mit den zwei ersten Buchstaben und Rest * ausfüllen."
 
 Aufbauend auf [001-data-ice-formular](../001-data-ice-formular/spec.md) und dessen
-Besucher-Telemetrie (Submission-Kontext, `FieldStat`, `FieldInteraction`).
+Besucher-Telemetrie (Submission-Kontext, `FieldStat`, `FieldInteraction`). Diese Datei
+enthält bewusst nur diese eine Feature-Spec, keine dauerhafte Session-Historie – neue
+Anpassungen werden direkt in Requirements/Ist-Stand nachgeführt und unten im Änderungsverlauf
+vermerkt.
 
 ## Clarifications
 
@@ -18,6 +23,7 @@ Besucher-Telemetrie (Submission-Kontext, `FieldStat`, `FieldInteraction`).
 - Vorname und Firma werden in der Auswertung maskiert: erste zwei Zeichen, jeder weitere Buchstabe als `*` (`Philippe` → `Ph******`, `AB` → `AB`).
 - Die Seite wird per HTTP-Basic-Auth geschützt, aktiv sobald `ANALYTICS_PASSWORD` gesetzt ist. Ohne Passwort ist sie offen erreichbar und zeigt einen Warnhinweis.
 - Keine Schreibzugriffe: die Seite ist rein lesend.
+- `TEST_FIRST_NAMES` (`lib/analytics.ts`) filtert bekannte Test-Submissions case-insensitiv aus allen Auswertungsteilen (KPIs, Verteilungen, Feld-Performance, Tabelle) heraus.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -80,6 +86,7 @@ nicht für jeden im Internet offen sein.
 - **FR-A07**: Die Seite MUSS bei fehlenden Daten leere Zustände statt Fehler anzeigen und immer aktuelle Daten laden (kein Build-Time-Caching).
 - **FR-A08**: Der Zugriff MUSS per HTTP-Basic-Auth geschützt werden, sobald `ANALYTICS_PASSWORD` gesetzt ist; Benutzername aus `ANALYTICS_USER` (Default `nexplore`). Ohne Passwort ist die Seite offen und MUSS einen Warnhinweis anzeigen.
 - **FR-A09**: Die Seite DARF keine unmaskierten direkt identifizierenden Personendaten anzeigen, die über die ersten zwei Zeichen von Vorname/Firma hinausgehen; Telefonnummer und IP-Adresse werden NICHT dargestellt.
+- **FR-A10**: Bekannte Test-/Entwicklungs-Submissions MÜSSEN aus allen Auswertungsteilen ausgeschlossen werden (`TEST_FIRST_NAMES`, case-insensitiver Vorname-Abgleich), damit KPIs und Verteilungen nur echte Formulardurchläufe widerspiegeln.
 
 ### Key Entities
 
@@ -94,6 +101,13 @@ Nur lesend aus 001: `Submission`, `FieldStat`, `FieldInteraction`.
 ## Umsetzung (Ist-Stand)
 
 - Seite: `app/auswertung/page.tsx` (Server Component, `dynamic = 'force-dynamic'`).
-- Aggregation + Maskierung: `lib/analytics.ts` (`mask()`, `getAnalytics()`).
+- Aggregation + Maskierung: `lib/analytics.ts` (`mask()`, `getAnalytics()`, `TEST_FIRST_NAMES`).
 - Zugriffsschutz: `middleware.ts`, Matcher `/auswertung/:path*`.
 - Konfiguration: `ANALYTICS_USER` / `ANALYTICS_PASSWORD` (via `.env.prod` → `docker-compose.prod.yml`).
+
+## Änderungshistorie
+
+| Datum | Änderung |
+|---|---|
+| 2026-09-03 | Erste Umsetzung: KPIs, Verteilungen, Feld-Performance-Tabelle, maskierte Einträge-Tabelle, Basic-Auth-Schutz. |
+| 2026-09-04 | Test-Submissions (`TEST_FIRST_NAMES`) aus der Auswertung gefiltert (FR-A10); Dokument an das Format von 001 angeglichen. |
