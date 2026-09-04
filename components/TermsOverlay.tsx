@@ -47,7 +47,7 @@ export default function TermsOverlay({ open, onClose }: Props) {
           </button>
         </div>
 
-        <div className="space-y-4 text-sm leading-relaxed text-slate-700">
+        <div className="space-y-4 text-base leading-relaxed text-slate-700">
           <p>
             <strong>§1 Geltungsbereich.</strong> Diese Bedingungen gelten für den Bezug von genau einer (1)
             Gratis-Glace am Nexplore-Stand. Eine zweite Glace ist physikalisch möglich, moralisch aber
